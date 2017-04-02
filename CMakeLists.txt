@@ -1,0 +1,82 @@
+# General Purpose CMakeLists.txt
+
+# cmake build script
+cmake_minimum_required(VERSION 2.8)
+
+# set compiler
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+# project
+project(final-project)
+
+# modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+
+# binary directory
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+
+# options
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(extern/glfw glfw)
+
+# add include directory
+include_directories(src)
+
+# add OPENGL
+find_package(OPENGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
+
+set(PROJECT_SOURCE
+	src/matty/application.h
+	src/matty/mat4.h
+	src/matty/matn.h
+	src/matty/matn.inl
+	src/matty/platform.h
+	src/matty/vec3.h
+	src/matty/vecn.h
+	src/matty/vecn.inl
+
+	src/opengl/gl3w.c
+	src/opengl/gl3w.h
+	src/opengl/glcorearb.h
+
+	src/main.cc
+)
+
+# build executable
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE})
+
+if(OPENGL_FOUND)
+  message(STATUS "opengl found")
+  target_link_libraries(${PROJECT_NAME} ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
+endif()
+
+if(OPENGL_FOUND)
+	message(STATUS "opengl found")
+	target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY})
+
+	if(OPENGL_GLU_FOUND)
+		message(STATUS "glu found")
+		target_link_libraries(${PROJECT_NAME} ${OPENGL_glu_LIBRARY})
+	endif()
+endif()
+
+target_link_libraries(${PROJECT_NAME} glfw)
+
+if(APPLE)
+  set_target_properties(${PROJECT_NAME} PROPERTIES OSX_ARCHITECTURES "i386;x86_64;")
+endif()
+
+add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/files
+  $<TARGET_FILE_DIR:${PROJECT_NAME}>
+)
+
+INSTALL(
+  TARGETS ${PROJECT_NAME}
+  RUNTIME DESTINATION ${EXECUTABLE_OUTPUT_PATH}
+)
