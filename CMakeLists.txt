@@ -31,9 +31,13 @@ include_directories(${OPENGL_INCLUDE_DIR})
 
 set(PROJECT_SOURCE
 	src/matty/application.h
+	src/matty/bufferedgeometry.h
 	src/matty/mat4.h
 	src/matty/matn.h
 	src/matty/matn.inl
+	src/matty/planebufferedgeometry.cc
+	src/matty/planebufferedgeometry.h
+
 	src/matty/platform.h
 	src/matty/vec3.h
 	src/matty/vecn.h

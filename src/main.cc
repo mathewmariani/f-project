@@ -3,8 +3,11 @@
 
 // includes
 #include "matty/application.h"
+#include "matty/planebufferedgeometry.h"
 
 namespace game {
+
+PlaneBufferedGeometry* p;
 
 void init(Config* config) {
 	config->window.width = 600;
@@ -18,6 +21,8 @@ void init(Config* config) {
 
 void load() {
 	printf("Load\n");
+
+	p = new PlaneBufferedGeometry(1, 1, 2, 2);
 }
 
 void update() {
@@ -25,7 +30,7 @@ void update() {
 }
 
 void draw() {
-
+	p->render();
 }
 
 void quit() {
