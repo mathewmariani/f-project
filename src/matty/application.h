@@ -133,9 +133,17 @@ static int boot(Application* app) {
 			return false;
 		}
 
+		
+
 		glfwSwapInterval(config.window.vsyn);
 		glfwMakeContextCurrent(window);
 		glfwSetWindowUserPointer(window, app);
+
+		// initialize gl3w
+		gl3wInit();
+
+		// just for now
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		return true;
 	};
