@@ -144,6 +144,8 @@ static int boot(Application* app) {
 		// initialize gl3w
 		gl3wInit();
 
+		glEnable(GL_BLEND);
+
 		// Enable depth test
 		glEnable(GL_DEPTH_TEST);
 

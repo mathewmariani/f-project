@@ -37,8 +37,9 @@ set(PROJECT_SOURCE
 	src/matty/matn.inl
 	src/matty/planebufferedgeometry.cc
 	src/matty/planebufferedgeometry.h
-
 	src/matty/platform.h
+	src/matty/shader.cc
+	src/matty/shader.h
 	src/matty/vec3.h
 	src/matty/vecn.h
 	src/matty/vecn.inl

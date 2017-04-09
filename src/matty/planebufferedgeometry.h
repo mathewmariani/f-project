@@ -4,6 +4,7 @@
 
 class PlaneBufferedGeometry : public BufferedGeometry {
 public:
+	PlaneBufferedGeometry() = default;
 	PlaneBufferedGeometry(int, int, int, int);
 	~PlaneBufferedGeometry();
 
