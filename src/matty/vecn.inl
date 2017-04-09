@@ -1,3 +1,5 @@
+#include <algorithm>
+
 template <typename T, const std::size_t length>
 inline vecn<T, length>::vecn() {
 	memset(&data, 0, sizeof(data));
@@ -157,7 +159,7 @@ template <typename T, const std::size_t length>
 inline vecn<T, length> vecn<T, length>::max(const vecn<T, length>& a, const vecn<T, length>& b) {
 	vecn<T, length> ret;
 	for (auto i = 0; i < length; ++i) {
-		ret[i] = std::max(a[i], b[i]);
+		ret[i] = (std::max)(a[i], b[i]);
 	}
 	return ret;
 }
@@ -166,7 +168,7 @@ template <typename T, const std::size_t length>
 inline vecn<T, length> vecn<T, length>::min(const vecn<T, length>& a, const vecn<T, length>& b) {
 	vecn<T, length> ret;
 	for (auto i = 0; i < length; ++i) {
-		ret[i] = std::min(a[i], b[i]);
+		ret[i] = (std::min)(a[i], b[i]);
 	}
 	return ret;
 }

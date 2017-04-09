@@ -1,17 +1,17 @@
 #pragma once
 
 // C/C++
-#include <math.h>
 #include "matn.h"
+#include "vecn.h"
 
 template <typename T>
 class mat4 : public matn<T, 4> {
-// constructors
+	// constructors
 public:
 	inline mat4() = default;
 	inline mat4(const matn<T, 4>& m) : matn<T, 4>(m) {}
 
-// static functions
+	// static functions
 public:
 	static inline mat4 transform(T x, T y, T z, T angle, T rx, T ry, T rz, T sx, T sy, T sz) {
 		mat4 ret = mat4::identity();
@@ -126,30 +126,70 @@ public:
 		return ret;
 	}
 
-	static inline mat4 perspective(T fovy, T aspect, T near, T far) {
+	static inline mat4 lookAt(const vecn<T, 3>& eye, const vecn<T, 3>& center, const vecn<T, 3>& up) {
+		const vec3<T> f = vec3<T>::normalize(center - eye);
+		const vec3<T> s = vec3<T>::cross(f, vec3<T>::normalize(up));
+		const vec3<T> u = vec3<T>::cross(s, f);
+
 		mat4 ret = mat4::identity();
-		float scale = (1.0f / std::tanf(fovy / 2.0f);
+		ret[0][0] = s[0];
+		ret[1][0] = s[1];
+		ret[2][0] = s[2];
+		ret[3][0] = T(0);
+
+		ret[0][1] = u[0];
+		ret[1][1] = u[1];
+		ret[2][1] = u[2];
+		ret[3][1] = T(0);
+
+		ret[0][2] = -f[0];
+		ret[1][2] = -f[1];
+		ret[2][2] = -f[2];
+		ret[3][2] = T(0);
+
+		ret[0][3] = T(0);
+		ret[1][3] = T(0);
+		ret[2][3] = T(0);
+		ret[3][3] = T(1);
+
+		return (ret * translate(-eye[0], -eye[1], -eye[2]));
+	}
+
+	static inline mat4 perspective(T fovy, T aspect, T n, T f) {
+		mat4 ret = mat4::identity();
+		float scale = (1.0f / std::tanf(fovy / 2.0f));
 		float ratio = (scale / aspect);
 		ret[0][0] = (ratio);
 		ret[1][1] = (scale);
-		ret[2][2] = (-(far) / (far - near));
-		ret[2][3] = (-1.0f));
-		ret[3][2] = (-(far * near) / (far - near));
+		ret[2][2] = (-(f) / (f - n));
+		ret[2][3] = (-1.0f);
+		ret[3][2] = (-(f * n) / (f - n));
 		ret[3][3] = (0.0f);
 		return ret;
 	};
 
-	static inline mat4 ortho(T left, T right, T bottom, T top, T near, T far) {
+	static inline mat4 ortho(T left, T right, T bottom, T top, T n, T f) {
 		mat4 ret = mat4::identity();
 		ret[0][0] = (2.0f / (right - left));
 		ret[1][1] = (2.0f / (top - bottom));
-		ret[2][2] = (-2.0f / (far - near));
+		ret[2][2] = (-2.0f / (f - n));
 		ret[3][0] = (-(right + left) / (right - left));
 		ret[3][1] = (-(top + bottom) / (top - bottom));
-		ret[3][2] = (-(far + near) / (far - near));
+		ret[3][2] = (-(f + n) / (f - n));
 		return ret;
 	}
 };
+
+template <typename T, const int N, const int M>
+static inline vecn<T, N> operator * (const vecn<T, N>& v, const matn<T, M>& m) {
+	vecn<T, 3> ret;
+	for (auto i = 0; i < N; ++i) {
+		for (auto j = 0; j < M; ++j) {
+			ret[i] += v[j] * m[j][i];
+		}
+	}
+	return ret;
+}
 
 // compile template functions
 typedef mat4<float> mat4f;

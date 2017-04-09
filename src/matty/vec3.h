@@ -15,9 +15,9 @@ public:
 
 	static inline vecn<T, 3> cross(const vecn<T, 3>& a, const vecn<T, 3>& b) {
 		vecn<T, 3> ret;
-		ret[0] = a[1] * b[2] - b[1] * a[2];
-		ret[0] = a[2] * b[0] - b[2] * a[0];
-		ret[0] = a[0] * b[1] - b[0] * a[1];
+		ret[0] = ((a[1] * b[2]) - (b[1] * a[2]));
+		ret[1] = ((a[2] * b[0]) - (b[2] * a[0]));
+		ret[2] = ((a[0] * b[1]) - (b[0] * a[1]));
 		return ret;
 	}
 };

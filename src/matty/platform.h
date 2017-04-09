@@ -17,6 +17,6 @@
 #endif
 
 // debug
-#if (_DEBUG)
-	#define DEBUG 1
+#if defined(_DEBUG)
+	#define DEBUG
 #endif

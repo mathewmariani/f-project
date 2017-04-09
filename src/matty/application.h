@@ -1,5 +1,7 @@
 #pragma once
 
+#define NOMINMAX
+
 // gl3w
 #include <opengl/gl3w.h>
 
@@ -46,7 +48,7 @@ static int run(Application* app) {
 		glfwPollEvents();
 
 		if (app->update) { app->update(); }
-		if (app->draw) { app->draw(); }
+		if (app->draw) {app->draw(); }
 
 		glfwSwapBuffers(window);
 
@@ -141,6 +143,12 @@ static int boot(Application* app) {
 
 		// initialize gl3w
 		gl3wInit();
+
+		// Enable depth test
+		glEnable(GL_DEPTH_TEST);
+
+		// Accept fragment if it closer to the camera than the former one
+		glDepthFunc(GL_LESS);
 
 		// just for now
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
