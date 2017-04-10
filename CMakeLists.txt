@@ -30,6 +30,8 @@ find_package(OPENGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 set(PROJECT_SOURCE
+	src/libraries/perlinnoise.cpp
+	src/libraries/perlinnoise.h
 	src/matty/application.h
 	src/matty/bufferedgeometry.h
 	src/matty/mat4.h

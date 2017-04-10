@@ -44,7 +44,7 @@ void initialize() {
 		"#version 330 core\n" \
 		"out vec4 frag_Color;" \
 		"void main() {" \
-		"frag_Color = vec4(1.0, 1.0, 0.0, 0.0);" \
+		"frag_Color = vec4(0.20, 0.59, 0.85, 1.00);" \
 		"}"
 	};
 
