@@ -12,4 +12,8 @@ public:
 
 private: // private variables
 	GLuint vao, vbo, ebo;
+
+	// buffers
+	std::vector<int> indices;
+	std::vector<float> vertices;
 };	// planebufferedgeometry

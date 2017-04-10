@@ -19,19 +19,29 @@ std::unordered_map<std::string, std::shared_ptr<Shader>> shader;
 void initialize() {
 	Shader::ShaderSource std_shader{
 		"#version 330 core\n" \
-		"layout(location = 0) in vec4 in_Vertex;" \
-		"layout(location = 1) in vec4 vertexColor;" \
+		"#define SCALE 10.0\n" \
+		"layout(location = 0) in vec3 in_Vertex;" \
 		"uniform mat4 uf_Projection;" \
 		"uniform mat4 uf_Transform;" \
 		"uniform mat4 uf_Model;" \
-		"out vec4 var_Color;" \
+		"uniform float uf_Time;" \
+		"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
+		"return transform_proj * vec4(vertpos.xyz, 1.0);" \
+		"}" \
+		"float calculateSurface(float x, float z) {" \
+		"float y = 0.0;" \
+		"y += (sin(x * 1.0 / SCALE + uf_Time * 1.0) + sin(x * 2.3 / SCALE + uf_Time * 1.5) + sin(x * 3.3 / SCALE + uf_Time * 0.4)) / 3.0;" \
+		"y += (sin(z * 0.2 / SCALE + uf_Time * 1.8) + sin(z * 1.8 / SCALE + uf_Time * 1.8) + sin(z * 2.8 / SCALE + uf_Time * 0.8)) / 3.0;" \
+		"return y;" \
+		"}" \
 		"void main() {" \
-		"var_Color = vertexColor;" \
-		"gl_Position = (uf_Projection * uf_Transform * uf_Model) * vec4(in_Vertex.xyz, 1.0);" \
+		"vec3 pos = in_Vertex;" \
+		"pos.y += 1.0 * calculateSurface(pos.x, pos.z);" \
+		"pos.y -= 1.0 * calculateSurface(0.0, 0.0);" \
+		"gl_Position = position((uf_Projection * uf_Transform * uf_Model), pos);" \
 		"}",
 
 		"#version 330 core\n" \
-		"in vec4 var_Color;" \
 		"out vec4 frag_Color;" \
 		"void main() {" \
 		"frag_Color = vec4(1.0, 1.0, 0.0, 0.0);" \
@@ -64,7 +74,7 @@ void load() {
 	printf("Load\n");
 	shaders::initialize();
 
-	plane = PlaneBufferedGeometry(4, 4, 4, 4);
+	plane = PlaneBufferedGeometry(100,100,100,100);
 }
 
 void update() {
@@ -78,7 +88,7 @@ void draw() {
 	s->setMatrix4("uf_Projection", projection);
 	s->setMatrix4("uf_Transform", transform);
 	s->setMatrix4("uf_Model", mat4f::identity());
-
+	s->setFloat("uf_Time", (float)glfwGetTime());
 	plane.render();
 }
 
