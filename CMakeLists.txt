@@ -45,7 +45,7 @@ set(PROJECT_SOURCE
 	src/matty/vec3.h
 	src/matty/vecn.h
 	src/matty/vecn.inl
-
+	src/matty/camera.h
 	src/opengl/gl3w.c
 	src/opengl/gl3w.h
 	src/opengl/glcorearb.h
