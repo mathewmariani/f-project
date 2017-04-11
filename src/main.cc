@@ -19,15 +19,6 @@ std::unordered_map<std::string, std::shared_ptr<Shader>> shader;
 
 void initialize() {
 	Shader::ShaderSource std_shader{
-		"#version 330 core\n" \
-		"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n" \
-		"layout(location = 0) in vec3 VertexPosition;" \
-		"layout(location = 1) in vec3 VertexTexCoord;" \
-		"layout(location = 2) in vec3 VertexColor;" \
-		"uniform mat4 uf_Projection;" \
-		"uniform mat4 uf_Transform;" \
-		"uniform mat4 uf_Model;" \
-		"vec4 position(mat4 transform_proj, vec3 vertpos);" \
 		"void main() {" \
 		"gl_Position = position(TransformProjectionMatrix, VertexPosition);" \
 		"}",
@@ -40,17 +31,8 @@ void initialize() {
 	};
 
 	Shader::ShaderSource water_shader{
-		"#version 330 core\n" \
-		"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n" \
 		"#define SCALE 10.0\n" \
-		"layout(location = 0) in vec3 VertexPosition;" \
-		"layout(location = 1) in vec3 VertexTexCoord;" \
-		"layout(location = 2) in vec3 VertexColor;" \
-		"uniform mat4 uf_Projection;" \
-		"uniform mat4 uf_Transform;" \
-		"uniform mat4 uf_Model;" \
 		"uniform float uf_Time;" \
-		"vec4 position(mat4 transform_proj, vec3 vertpos);" \
 		"float calculateSurface(float x, float z) {" \
 		"float y = 0.0;" \
 		"y += (sin(x * 1.0 / SCALE + uf_Time * 1.0) + sin(x * 2.3 / SCALE + uf_Time * 1.5) + sin(x * 3.3 / SCALE + uf_Time * 0.4)) / 3.0;" \
