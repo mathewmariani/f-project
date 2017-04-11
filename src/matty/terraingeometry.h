@@ -2,11 +2,11 @@
 
 #include "bufferedgeometry.h"
 
-class PlaneBufferedGeometry : public BufferedGeometry {
+class TerrainGeometry : public BufferedGeometry {
 public:
-	PlaneBufferedGeometry() : vao(0), vbo(0), ebo(0) {};
-	PlaneBufferedGeometry(int, int, int, int);
-	~PlaneBufferedGeometry();
+	TerrainGeometry() : vao(0), vbo(0), ebo(0) {};
+	TerrainGeometry(int, int, int, int);
+	~TerrainGeometry();
 
 	void render();
 

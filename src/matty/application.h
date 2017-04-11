@@ -155,6 +155,11 @@ static int boot(Application* app) {
 		// just for now
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		// vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
 		return true;
 	};
 

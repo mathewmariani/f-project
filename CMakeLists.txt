@@ -30,8 +30,10 @@ find_package(OPENGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 set(PROJECT_SOURCE
+	src/libraries/noise.h
 	src/libraries/perlinnoise.cpp
 	src/libraries/perlinnoise.h
+
 	src/matty/application.h
 	src/matty/bufferedgeometry.h
 	src/matty/mat4.h
@@ -42,6 +44,8 @@ set(PROJECT_SOURCE
 	src/matty/platform.h
 	src/matty/shader.cc
 	src/matty/shader.h
+	src/matty/terraingeometry.cc
+	src/matty/terraingeometry.h
 	src/matty/vec3.h
 	src/matty/vecn.h
 	src/matty/vecn.inl

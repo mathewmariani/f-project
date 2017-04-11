@@ -11,6 +11,7 @@
 #include "matty/mat4.h"
 #include "matty/vec3.h"
 #include "matty/planebufferedgeometry.h"
+#include "matty/terraingeometry.h"
 
 namespace shaders {
 
@@ -18,6 +19,26 @@ std::unordered_map<std::string, std::shared_ptr<Shader>> shader;
 
 void initialize() {
 	Shader::ShaderSource std_shader{
+		"#version 330 core\n" \
+		"layout(location = 0) in vec3 in_Vertex;" \
+		"uniform mat4 uf_Projection;" \
+		"uniform mat4 uf_Transform;" \
+		"uniform mat4 uf_Model;" \
+		"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
+		"return transform_proj * vec4(vertpos.xyz, 1.0);" \
+		"}" \
+		"void main() {" \
+		"gl_Position = position((uf_Projection * uf_Transform * uf_Model), in_Vertex);" \
+		"}",
+
+		"#version 330 core\n" \
+		"out vec4 frag_Color;" \
+		"void main() {" \
+		"frag_Color = vec4(1.0, 1.0, 1.0, 1.0);" \
+		"}"
+	};
+
+	Shader::ShaderSource water_shader{
 		"#version 330 core\n" \
 		"#define SCALE 10.0\n" \
 		"layout(location = 0) in vec3 in_Vertex;" \
@@ -49,6 +70,7 @@ void initialize() {
 	};
 
 	shader["std"] = std::make_shared<Shader>(std_shader);
+	shader["water"] = std::make_shared<Shader>(water_shader);
 }
 
 }
@@ -56,7 +78,8 @@ void initialize() {
 namespace game {
 
 mat4f projection = mat4f::perspective(45.0f, ((float)600 / (float)533), 0.1f, 100.0f);
-mat4f transform = mat4f::lookAt(vec3f(4.0f, 3.0f, -3.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
+//mat4f transform = mat4f::lookAt(vec3f(4.0f, 3.0f, -3.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
+mat4f transform = mat4f::lookAt(vec3f(4.0f, 25.0f, -100.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
 
 void init(Config* config) {
 	config->window.width = 600;
@@ -68,13 +91,15 @@ void init(Config* config) {
 	config->window.vsyn = true;
 }
 
-PlaneBufferedGeometry plane;
+TerrainGeometry plane;
+PlaneBufferedGeometry water;
 
 void load() {
 	printf("Load\n");
 	shaders::initialize();
 
-	plane = PlaneBufferedGeometry(100,100,100,100);
+	//water = PlaneBufferedGeometry(100, 100, 100, 100);
+	plane = TerrainGeometry(100, 100, 100, 100);
 }
 
 void update() {
@@ -83,12 +108,19 @@ void update() {
 void draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	auto s = shaders::shader["std"];
-	s->attach();
-	s->setMatrix4("uf_Projection", projection);
-	s->setMatrix4("uf_Transform", transform);
-	s->setMatrix4("uf_Model", mat4f::identity());
-	s->setFloat("uf_Time", (float)glfwGetTime());
+	//auto water_shader = shaders::shader["water"];
+	//water_shader->attach();
+	//water_shader->setMatrix4("uf_Projection", projection);
+	//water_shader->setMatrix4("uf_Transform", transform);
+	//water_shader->setMatrix4("uf_Model", mat4f::identity());
+	//water_shader->setFloat("uf_Time", (float)glfwGetTime());
+	//water.render();
+
+	auto std_shader = shaders::shader["std"];
+	std_shader->attach();
+	std_shader->setMatrix4("uf_Projection", projection);
+	std_shader->setMatrix4("uf_Transform", transform);
+	std_shader->setMatrix4("uf_Model", mat4f::identity());
 	plane.render();
 }
 
