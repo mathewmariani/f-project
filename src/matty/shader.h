@@ -23,9 +23,10 @@ public:
 public:
 	Shader() = default;
 	Shader(const ShaderSource& source);
-	Shader(const GLchar * vertexPath, const GLchar * fragmentPath, GLchar * shaderName);
+	Shader(const GLchar * vertexPath, const GLchar * fragmentPath);
 	~Shader();
 
+	Shader::ShaderSource Shader::readFromFile(const GLchar * vertexPath, const GLchar * fragmentPath);
 	/**
 	* Use this function to attach this shader to the current rendering state.
 	*/

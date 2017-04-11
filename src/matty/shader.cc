@@ -103,7 +103,7 @@ void Shader::compile(const ShaderSource& source) {
 	glDeleteShader(fragmentShader);
 }
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, GLchar* shaderName)
+Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 {
 
 	// 1. Retrieve the vertex/fragment source code from filePath
@@ -129,6 +129,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, GLchar* sha
 		// Convert stream into string
 		vertexCode = vShaderStream.str();
 		fragmentCode = fShaderStream.str();
+		//ShaderSource = fragmentCode(vertexCode, fragmentCode);
 	}
 	catch (std::ifstream::failure e)
 	{
@@ -184,4 +185,36 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, GLchar* sha
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
 
+}
+
+Shader::ShaderSource Shader::readFromFile(const GLchar * vertexPath, const GLchar * fragmentPath) {
+	std::string vertexCode;
+	std::string fragmentCode;
+	std::ifstream vShaderFile;
+	std::ifstream fShaderFile;
+	// ensures ifstream objects can throw exceptions:
+	vShaderFile.exceptions(std::ifstream::badbit);
+	fShaderFile.exceptions(std::ifstream::badbit);
+	try
+	{
+		// Open files
+		vShaderFile.open(vertexPath);
+		fShaderFile.open(fragmentPath);
+		std::stringstream vShaderStream, fShaderStream;
+		// Read file's buffer contents into streams
+		vShaderStream << vShaderFile.rdbuf();
+		fShaderStream << fShaderFile.rdbuf();
+		// close file handlers
+		vShaderFile.close();
+		fShaderFile.close();
+		// Convert stream into string
+		vertexCode = vShaderStream.str();
+		fragmentCode = fShaderStream.str();
+		//ShaderSource = fragmentCode(vertexCode, fragmentCode);
+	}
+	catch (std::ifstream::failure e)
+	{
+		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+	}
+	return ShaderSource{ vertexCode, fragmentCode };
 }

@@ -49,9 +49,8 @@ namespace shaders {
 			"}"
 		};
 		shader["std"] = std::make_shared<Shader>(std_shader);
-
-		Shader::ShaderSource light_shader{ "shader.vert", "shader.frag" };
-		shader["light"] = std::make_shared<Shader>(light_shader);
+		Shader lightingShader("shader.vert", "shader.frag");
+		shader["light"] = std::make_shared<Shader>(lightingShader);
 	}
 
 }
@@ -193,7 +192,7 @@ namespace game {
 	bool firstMouse = true;
 	void cursor_callback(GLFWwindow* window, double xpos, double ypos)
 	{
-		if (mouseButtonLeftDown) {
+		//if (mouseButtonLeftDown) {
 			if (firstMouse)
 			{
 				lastX = xpos;
@@ -207,8 +206,8 @@ namespace game {
 			lastX = xpos;
 			lastY = ypos;
 
-			camera.ProcessMouseMovement(xoffset, yoffset);
-		}
+			camera.ProcessMouseMovement(xoffset, yoffset,false);
+		//}
 		
 	}
 		
