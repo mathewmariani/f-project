@@ -23,8 +23,8 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 	// persistence, frequency, amplitude, octaves
-	PerlinNoise pn;
-	pn.Set(1.0, 1.0, 1.0, 1.0, 255);
+	//PerlinNoise pn;
+	//pn.Set(1.0, 1.0, 1.0, 1.0, 255);
 
 	const siv::PerlinNoise perlin(12345);
 	const double fx = w / 8.0;
@@ -89,6 +89,6 @@ TerrainGeometry::~TerrainGeometry() {
 void TerrainGeometry::render() {
 	//glBindVertexArray(vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glDrawElements(GL_TRIANGLES, indices.size() * sizeof(int), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	//glBindVertexArray(0);
 }

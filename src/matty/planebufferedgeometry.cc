@@ -73,6 +73,6 @@ PlaneBufferedGeometry::~PlaneBufferedGeometry() {
 void PlaneBufferedGeometry::render() {
 	//glBindVertexArray(vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glDrawElements(GL_TRIANGLES, indices.size() * sizeof(int), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	//glBindVertexArray(0);
 }

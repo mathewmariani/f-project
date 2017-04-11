@@ -91,14 +91,14 @@ void init(Config* config) {
 	config->window.vsyn = true;
 }
 
-TerrainGeometry plane;
 PlaneBufferedGeometry water;
+TerrainGeometry plane;
 
 void load() {
 	printf("Load\n");
 	shaders::initialize();
 
-	//water = PlaneBufferedGeometry(100, 100, 100, 100);
+	water = PlaneBufferedGeometry(100, 100, 100, 100);
 	plane = TerrainGeometry(100, 100, 100, 100);
 }
 
@@ -108,13 +108,13 @@ void update() {
 void draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//auto water_shader = shaders::shader["water"];
-	//water_shader->attach();
-	//water_shader->setMatrix4("uf_Projection", projection);
-	//water_shader->setMatrix4("uf_Transform", transform);
-	//water_shader->setMatrix4("uf_Model", mat4f::identity());
-	//water_shader->setFloat("uf_Time", (float)glfwGetTime());
-	//water.render();
+	auto water_shader = shaders::shader["water"];
+	water_shader->attach();
+	water_shader->setMatrix4("uf_Projection", projection);
+	water_shader->setMatrix4("uf_Transform", transform);
+	water_shader->setMatrix4("uf_Model", mat4f::identity());
+	water_shader->setFloat("uf_Time", (float)glfwGetTime());
+	water.render();
 
 	auto std_shader = shaders::shader["std"];
 	std_shader->attach();
