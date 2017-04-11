@@ -4,7 +4,7 @@
 
 class TerrainGeometry : public BufferedGeometry {
 public:
-	TerrainGeometry() : vao(0), vbo(0), ebo(0) {};
+	TerrainGeometry() = default;
 	TerrainGeometry(int, int, int, int);
 	~TerrainGeometry();
 

@@ -15,8 +15,8 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 	auto segment_height = (float)h / (float)hs;
 
 	// vertex array object
-	//glGenVertexArrays(1, &vao);
-	//glBindVertexArray(vao);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
 	// vertex buffer object
 	glGenBuffers(1, &vbo);
@@ -79,7 +79,7 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
 	// unbind vao
-	//glBindVertexArray(0);
+	glBindVertexArray(0);
 }
 
 TerrainGeometry::~TerrainGeometry() {
@@ -87,8 +87,8 @@ TerrainGeometry::~TerrainGeometry() {
 }
 
 void TerrainGeometry::render() {
-	//glBindVertexArray(vao);
+	glBindVertexArray(vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	//glBindVertexArray(0);
+	glBindVertexArray(0);
 }
