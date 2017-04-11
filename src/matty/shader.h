@@ -19,6 +19,7 @@ public:
 
 public:
 	static Shader *current;
+	static std::string common;
 
 public:
 	Shader() = default;

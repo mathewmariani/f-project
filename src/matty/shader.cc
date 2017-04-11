@@ -3,6 +3,12 @@
 
 Shader* Shader::current{ nullptr };
 
+std::string Shader::common{
+	"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
+	"return transform_proj * vec4(vertpos.xyz, 1.0);" \
+	"}"
+};
+
 Shader::Shader(const ShaderSource& source) {
 	compile(source);
 }
@@ -47,6 +53,12 @@ void Shader::setMatrix4(const std::string& name, const mat4f& matrix) {
 
 void Shader::compile(const ShaderSource& source) {
 	// vertex shader
+	auto commonShader = glCreateShader(GL_VERTEX_SHADER);
+	const GLchar* comm = Shader::common.c_str();
+	glShaderSource(commonShader, 1, (const GLchar**)&comm, NULL);
+	glCompileShader(commonShader);
+
+	// vertex shader
 	auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	const GLchar* vert = source.vertex.c_str();
 	glShaderSource(vertexShader, 1, (const GLchar**)&vert, NULL);
@@ -78,8 +90,10 @@ void Shader::compile(const ShaderSource& source) {
 
 	// attach shaders
 	program = glCreateProgram();
+	glAttachShader(program, commonShader);
 	glAttachShader(program, vertexShader);
 	glAttachShader(program, fragmentShader);
+	
 
 	// linker
 	glLinkProgram(program);
