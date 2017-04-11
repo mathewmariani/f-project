@@ -23,6 +23,7 @@ public:
 public:
 	Shader() = default;
 	Shader(const ShaderSource& source);
+	Shader(const GLchar * vertexPath, const GLchar * fragmentPath, GLchar * shaderName);
 	~Shader();
 
 	/**
@@ -46,6 +47,8 @@ public:
 
 private:
 	void compile(const ShaderSource& source);
+
+	
 
 private:
 	GLuint program;

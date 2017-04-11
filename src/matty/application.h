@@ -21,7 +21,29 @@ typedef struct {
 		bool vsyn : true;
 	} Window;
 
+	//typedef struct 
+	//{
+	//	GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
+	//	GLfloat lastFrame = 0.0f;  	// Time of last frame
+
+	//	GLfloat point_size = 11.0f;
+
+	//	// Camera
+	//	Camera  camera;
+	//	GLfloat lastX = 0.0;
+	//	GLfloat lastY= 0.0f;
+	//	bool    keys[1024];
+
+	//	bool mouseButtonLeftDown = false;
+	//	double mousePosY = 0;
+	//	double mousePosY_down = 0;
+
+	//	// Light attributes
+	//	vec3<float> lightPos;
+	//}GameSettings;
+
 	Window window;
+	//GameSettings gameSettings;
 } Config;
 
 typedef struct {
