@@ -32,7 +32,7 @@ typedef struct {
 	void(*quit)() = nullptr;
 	void(*keyPressed)(int, int) = nullptr;
 	void(*keyReleased)(int, int) = nullptr;
-	void(*mouseMotion)() = nullptr;
+	void(*mouseMotion)(double, double) = nullptr;
 	void(*mousePressed)(int, int, int) = nullptr;
 	void(*mouseReleased)(int, int, int) = nullptr;
 } Application;
@@ -95,6 +95,11 @@ static void glfw_onMouse(GLFWwindow* window, int button, int action, int mods) {
 	}
 }
 
+static void glfw_OnCursorMove(GLFWwindow* window, double xpos, double ypos) {
+	Application* app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
+
+	app->mouseMotion(xpos, ypos);
+}
 static int boot(Application* app) {
 	if (app == nullptr) {
 		return 0;
@@ -177,6 +182,6 @@ static int boot(Application* app) {
 	//glfwSetFramebufferSizeCallback(window, glfw_onResize);
 	glfwSetKeyCallback(window, glfw_onKey);
 	glfwSetMouseButtonCallback(window, glfw_onMouse);
-
+	glfwSetCursorPosCallback(window, glfw_OnCursorMove);
 	return run(app);
 }

@@ -47,9 +47,11 @@ set(PROJECT_SOURCE
 	src/matty/terraingeometry.cc
 	src/matty/terraingeometry.h
 	src/matty/vec3.h
+	src/matty/vec2.h
 	src/matty/vecn.h
 	src/matty/vecn.inl
-
+	src/matty/vertex.h
+	src/matty/camera.h
 	src/opengl/gl3w.c
 	src/opengl/gl3w.h
 	src/opengl/glcorearb.h

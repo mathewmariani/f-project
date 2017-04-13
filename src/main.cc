@@ -12,6 +12,8 @@
 #include "matty/vec3.h"
 #include "matty/planebufferedgeometry.h"
 #include "matty/terraingeometry.h"
+#include"matty/camera.h"
+
 
 namespace shaders {
 
@@ -55,26 +57,55 @@ void initialize() {
 
 	shader["std"] = std::make_shared<Shader>(std_shader);
 	shader["water"] = std::make_shared<Shader>(water_shader);
-}
-
+	}
 }
 
 namespace game {
 
-mat4f projection = mat4f::perspective(45.0f, ((float)600 / (float)533), 0.1f, 100.0f);
-//mat4f transform = mat4f::lookAt(vec3f(4.0f, 3.0f, -3.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
-mat4f transform = mat4f::lookAt(vec3f(4.0f, 25.0f, -100.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
+	Config* gameConfig;
 
-void init(Config* config) {
-	config->window.width = 600;
-	config->window.height = 533;
-	config->window.decorated = true;
-	config->window.floating = false;
-	config->window.focused = false;
-	config->window.resizable = false;
-	config->window.vsyn = true;
-}
+	// Camera
+	Camera  camera(vec3<float>(0.0f, 15.0f, 3.0f));
+	GLfloat lastX = 0.0f;
+	GLfloat lastY = 0.0f;
+	bool    keys[1024];
 
+	// Light attributes
+	vec3<float> lightPos(1.2f, 1.0f, 2.0f);
+
+	// Deltatime
+	GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
+	GLfloat lastFrame = 0.0f;  	// Time of last frame
+
+	/// Handle mouse input
+	bool mouseButtonLeftDown = false;
+	double mousePosY = 0;
+	double mousePosY_down = 0;
+
+	mat4f projection = mat4f::perspective(45.0f, ((float)600 / (float)533), 0.1f, 100.0f);
+	mat4f transform = camera.GetViewMatrix();
+	//mat4f transform = mat4f::lookAt(vec3f(4.0f, 25.0f, -100.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
+	//prototype
+	void initGameSettings();
+	void do_movement();
+
+	void init(Config* config) {
+		config->window.width = 600;
+		config->window.height = 533;
+		config->window.decorated = true;
+		config->window.floating = false;
+		config->window.focused = false;
+		config->window.resizable = false;
+		config->window.vsyn = true;
+		gameConfig = config;
+		//initGameSettings();
+	}
+
+	void initGameSettings() {
+		GLfloat lastX = gameConfig->window.width / 2.0;
+		GLfloat lastY = gameConfig->window.height / 2.0;
+	}
+	
 PlaneBufferedGeometry water;
 TerrainGeometry plane;
 
@@ -86,9 +117,28 @@ void load() {
 	plane = TerrainGeometry(100, 100, 100, 100);
 }
 
-void update() {
-}
+	void update() {
+		// Calculate deltatime of current frame
+		GLfloat currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
+		do_movement();
+	}
+	void do_movement()
+	{
+		// Camera controls
+		if (keys[GLFW_KEY_W])
+			camera.ProcessKeyboard(FORWARD, deltaTime);
+		if (keys[GLFW_KEY_S])
+			camera.ProcessKeyboard(BACKWARD, deltaTime);
+		if (keys[GLFW_KEY_A])
+			camera.ProcessKeyboard(LEFT, deltaTime);
+		if (keys[GLFW_KEY_D])
+			camera.ProcessKeyboard(RIGHT, deltaTime);
+	}
+	
+	
 void draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -108,47 +158,104 @@ void draw() {
 	plane.render();
 }
 
-void quit() {
-	printf("Quit\n");
-}
+void draw2() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		transform = camera.GetViewMatrix();
+		auto water_shader = shaders::shader["water"];
+		water_shader->attach();
+		water_shader->setMatrix4("uf_Projection", projection);
+		water_shader->setMatrix4("uf_Transform", transform);
+		water_shader->setMatrix4("uf_Model", mat4f::identity());
+		water_shader->setFloat("uf_Time", (float)glfwGetTime());
+		water.render();
 
-void mousePressed(int x, int y, int button) {
-	printf("Mouse Pressed\n");
-}
+		auto std_shader = shaders::shader["std"];
+		std_shader->attach();
+		std_shader->setMatrix4("uf_Projection", projection);
+		std_shader->setMatrix4("uf_Transform", transform);
+		std_shader->setMatrix4("uf_Model", mat4f::identity());
+		plane.render();
+	}
 
-void mouseReleased(int x, int y, int button) {
-	printf("Mouse Released\n");
-}
+	void quit() {
+		printf("Quit\n");
+	}
 
-void keyPressed(int key, int scancode) {
-	printf("Key Pressed\n");
-}
+	void mousePressed(int x, int y, int button) {
+		printf("Mouse Pressed\n");
+		mouseButtonLeftDown = true;
+		mousePosY_down = y;
+	}
 
-void keyReleased(int key, int scancode) {
-	printf("Key Released\n");
-}
+	void mouseReleased(int x, int y, int button) {
+		printf("Mouse Released\n");
+		mouseButtonLeftDown = false;
+	}
 
+	void keyPressed(int key, int scancode) {
+		printf("Key Pressed\n");
+		keys[key] = true;
+		std::cout << "key: " << key << std::endl;
+		switch (key)
+		{
+			//the user can change the rendering mode i.e. points, lines, triangles based on keyboard input 
+			case	GLFW_KEY_P: {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+			}break;
+			case	GLFW_KEY_O: {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}break;
+			case	GLFW_KEY_T: {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}break;
+		}
+	}
+	void keyReleased(int key, int scancode) {
+		printf("Key Released\n");
+		keys[key] = false;
+	}
+	bool firstMouse = true;
+	void cursor_callback( double xpos, double ypos)
+	{
+		if (mouseButtonLeftDown) {
+			
+			if (firstMouse)
+			{
+				lastX = xpos;
+				lastY = ypos;
+				firstMouse = false;
+			}
+
+			GLfloat xoffset = xpos - lastX;
+			GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+
+			camera.ProcessMouseMovement(xoffset, yoffset);
+		}
+		lastX = xpos;
+		lastY = ypos;
+	}
+		
 }	// game
 
 
-int main(int argc, const char** argv) {
-	Application* app = new Application();
+	int main(int argc, const char** argv) {
+		Application* app = new Application();
 
 #if defined(DEBUG)
-	printf("Debug Build\n");
+		printf("Debug Build\n");
 #endif
 
-	app->init = &game::init;
-	app->load = &game::load;
-	app->update = &game::update;
-	app->draw = &game::draw;
-	app->quit = &game::quit;
-	app->mousePressed = &game::mousePressed;
-	app->mouseReleased = &game::mouseReleased;
-	app->keyPressed = &game::keyPressed;
-	app->keyReleased = &game::keyReleased;
-
-	boot(app);
-	delete app;
-	return 0;
-}
+		app->init = &game::init;
+		app->load = &game::load;
+		app->update = &game::update;
+		app->draw = &game::draw2;//draw;
+		app->quit = &game::quit;
+		app->mousePressed = &game::mousePressed;
+		app->mouseReleased = &game::mouseReleased;
+		app->keyPressed = &game::keyPressed;
+		app->keyReleased = &game::keyReleased;
+		app->mouseMotion = &game::cursor_callback;
+		boot(app);
+		delete app;
+		return 0;
+	}
