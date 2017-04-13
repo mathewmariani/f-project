@@ -30,6 +30,16 @@ find_package(OPENGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 set(PROJECT_SOURCE
+	src/libraries/soil/image_DXT.c
+	src/libraries/soil/image_DXT.h
+	src/libraries/soil/image_helper.c
+	src/libraries/soil/image_helper.h
+	src/libraries/soil/soil.c
+	src/libraries/soil/soil.h
+	src/libraries/soil/stb_image_aug.c
+	src/libraries/soil/stb_image_aug.h
+	src/libraries/soil/stbi_DDS_aug_c.h
+	src/libraries/soil/stbi_DDS_aug.h
 	src/libraries/noise.h
 	src/libraries/perlinnoise.cpp
 	src/libraries/perlinnoise.h
@@ -57,6 +67,8 @@ set(PROJECT_SOURCE
 	src/opengl/glcorearb.h
 
 	src/main.cc
+	src/textures.cc
+	src/textures.h
 )
 
 # build executable
