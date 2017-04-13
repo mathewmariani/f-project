@@ -41,6 +41,9 @@ void Shader::attach() {
 }
 
 void Shader::detach() {
+	if (current == this) {
+		current = nullptr;
+	}
 	glUseProgram(0);
 }
 

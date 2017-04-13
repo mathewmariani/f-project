@@ -57,7 +57,7 @@ void initialize() {
 
 	shader["std"] = std::make_shared<Shader>(std_shader);
 	shader["water"] = std::make_shared<Shader>(water_shader);
-	}
+}
 }
 
 namespace game {
@@ -117,26 +117,27 @@ void load() {
 	plane = TerrainGeometry(100, 100, 100, 100);
 }
 
-	void update() {
-		// Calculate deltatime of current frame
-		GLfloat currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+void update() {
+	// Calculate deltatime of current frame
+	GLfloat currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
 
-		do_movement();
-	}
-	void do_movement()
-	{
-		// Camera controls
-		if (keys[GLFW_KEY_W])
-			camera.ProcessKeyboard(FORWARD, deltaTime);
-		if (keys[GLFW_KEY_S])
-			camera.ProcessKeyboard(BACKWARD, deltaTime);
-		if (keys[GLFW_KEY_A])
-			camera.ProcessKeyboard(LEFT, deltaTime);
-		if (keys[GLFW_KEY_D])
-			camera.ProcessKeyboard(RIGHT, deltaTime);
-	}
+	do_movement();
+}
+
+void do_movement()
+{
+	// Camera controls
+	if (keys[GLFW_KEY_W])
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (keys[GLFW_KEY_S])
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (keys[GLFW_KEY_A])
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (keys[GLFW_KEY_D])
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+}
 	
 	
 void draw() {
@@ -199,13 +200,13 @@ void draw2() {
 		switch (key)
 		{
 			//the user can change the rendering mode i.e. points, lines, triangles based on keyboard input 
-			case	GLFW_KEY_P: {
+			case GLFW_KEY_P: {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 			}break;
-			case	GLFW_KEY_O: {
+			case GLFW_KEY_O: {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			}break;
-			case	GLFW_KEY_T: {
+			case GLFW_KEY_T: {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}break;
 		}
