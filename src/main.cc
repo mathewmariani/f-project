@@ -123,7 +123,7 @@ void load() {
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		
+		do_movement();
 	}
 	void do_movement()
 	{
@@ -209,7 +209,6 @@ void draw2() {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}break;
 		}
-		do_movement();
 	}
 	void keyReleased(int key, int scancode) {
 		printf("Key Released\n");
