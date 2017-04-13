@@ -14,6 +14,7 @@
 #include "matty/terraingeometry.h"
 #include"matty/camera.h"
 
+
 namespace shaders {
 
 std::unordered_map<std::string, std::shared_ptr<Shader>> shader;
@@ -57,12 +58,10 @@ void initialize() {
 	shader["std"] = std::make_shared<Shader>(std_shader);
 	shader["water"] = std::make_shared<Shader>(water_shader);
 	}
-
 }
 
 namespace game {
 
-	
 	Config* gameConfig;
 
 	// Camera
@@ -106,6 +105,7 @@ namespace game {
 		GLfloat lastX = gameConfig->window.width / 2.0;
 		GLfloat lastY = gameConfig->window.height / 2.0;
 	}
+	
 PlaneBufferedGeometry water;
 TerrainGeometry plane;
 

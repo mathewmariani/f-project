@@ -100,6 +100,7 @@ void Shader::compile(const ShaderSource& source) {
 	program = glCreateProgram();
 	glAttachShader(program, vertexShader);
 	glAttachShader(program, fragmentShader);
+	
 
 	// linker
 	glLinkProgram(program);
@@ -117,7 +118,6 @@ void Shader::compile(const ShaderSource& source) {
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 }
-
 Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 {
 
@@ -202,7 +202,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 
 }
 
-Shader::ShaderSource Shader::readFromFile(const GLchar * vertexPath, const GLchar * fragmentPath) {
+/*Shader::ShaderSource Shader::readFromFile(const GLchar * vertexPath, const GLchar * fragmentPath) {
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::ifstream vShaderFile;
@@ -232,4 +232,4 @@ Shader::ShaderSource Shader::readFromFile(const GLchar * vertexPath, const GLcha
 		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
 	}
 	return ShaderSource{ vertexCode, fragmentCode };
-}
+}*/
