@@ -1,10 +1,12 @@
 #include <iostream>
 #include <vector>
-#include "planebufferedgeometry.h"
+#include "terraingeometry.h"
 
+#include "libraries/PerlinNoise.h"
+#include "libraries/noise.h"
 #include "opengl/gl3w.h"
 
-PlaneBufferedGeometry::PlaneBufferedGeometry(int w, int h, int ws, int hs) {
+TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 
 	auto width_half = (float)w / (float)2;
 	auto height_half = (float)h / (float)2;
@@ -20,13 +22,27 @@ PlaneBufferedGeometry::PlaneBufferedGeometry(int w, int h, int ws, int hs) {
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+	// persistence, frequency, amplitude, octaves
+	//PerlinNoise pn;
+	//pn.Set(1.0, 1.0, 1.0, 1.0, 255);
+
+	const siv::PerlinNoise perlin(12345);
+	const double fx = w / 8.0;
+	const double fy = h / 8.0;
+
 	// generate vertices, normals and uvs
 	for (auto i = 0; i <= hs; ++i) {
 		auto y = i * segment_height - height_half;
 		for (auto j = 0; j <= ws; ++j) {
+
+			double nx = j / ws - 0.5;
+			double ny = i / hs - 0.5;
+			//auto n = 1 * pn.GetHeight(2.42 * nx, 2.42 * ny);
+			auto n = 15 * perlin.octaveNoise0_1(i / fx, j / fy, 8);
+
 			auto x = j * segment_width - width_half;
 			vertices.push_back(x);
-			vertices.push_back(0);
+			vertices.push_back(n);
 			vertices.push_back(-y);
 		}
 	}
@@ -66,13 +82,13 @@ PlaneBufferedGeometry::PlaneBufferedGeometry(int w, int h, int ws, int hs) {
 	glBindVertexArray(0);
 }
 
-PlaneBufferedGeometry::~PlaneBufferedGeometry() {
+TerrainGeometry::~TerrainGeometry() {
 
 }
 
-void PlaneBufferedGeometry::render() {
+void TerrainGeometry::render() {
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glDrawElementsBaseVertex(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, 0);
-	//glBindVertexArray(0);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }

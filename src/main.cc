@@ -11,46 +11,51 @@
 #include "matty/mat4.h"
 #include "matty/vec3.h"
 #include "matty/planebufferedgeometry.h"
+#include "matty/terraingeometry.h"
 #include"matty/camera.h"
 
 namespace shaders {
 
-	std::unordered_map<std::string, std::shared_ptr<Shader>> shader;
+std::unordered_map<std::string, std::shared_ptr<Shader>> shader;
 
-	void initialize() {
-		Shader::ShaderSource std_shader{
-			"#version 330 core\n" \
-			"#define SCALE 10.0\n" \
-			"layout(location = 0) in vec3 in_Vertex;" \
-			"uniform mat4 uf_Projection;" \
-			"uniform mat4 uf_Transform;" \
-			"uniform mat4 uf_Model;" \
-			"uniform float uf_Time;" \
-			"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
-			"return transform_proj * vec4(vertpos.xyz, 1.0);" \
-			"}" \
-			"float calculateSurface(float x, float z) {" \
-			"float y = 0.0;" \
-			"y += (sin(x * 1.0 / SCALE + uf_Time * 1.0) + sin(x * 2.3 / SCALE + uf_Time * 1.5) + sin(x * 3.3 / SCALE + uf_Time * 0.4)) / 3.0;" \
-			"y += (sin(z * 0.2 / SCALE + uf_Time * 1.8) + sin(z * 1.8 / SCALE + uf_Time * 1.8) + sin(z * 2.8 / SCALE + uf_Time * 0.8)) / 3.0;" \
-			"return y;" \
-			"}" \
-			"void main() {" \
-			"vec3 pos = in_Vertex;" \
-			"pos.y += 1.0 * calculateSurface(pos.x, pos.z);" \
-			"pos.y -= 1.0 * calculateSurface(0.0, 0.0);" \
-			"gl_Position = position((uf_Projection * uf_Transform * uf_Model), pos);" \
-			"}",
+void initialize() {
+	Shader::ShaderSource std_shader{
+		"void main() {" \
+		"gl_Position = position(TransformProjectionMatrix, VertexPosition);" \
+		"}",
 
-			"#version 330 core\n" \
-			"out vec4 frag_Color;" \
-			"void main() {" \
-			"frag_Color = vec4(0.20, 0.59, 0.85, 1.00);" \
-			"}"
-		};
-		shader["std"] = std::make_shared<Shader>(std_shader);
-		Shader lightingShader("shader.vert", "shader.frag");
-		shader["light"] = std::make_shared<Shader>(lightingShader);
+		"#version 330 core\n" \
+		"out vec4 frag_Color;" \
+		"void main() {" \
+		"frag_Color = vec4(1.0, 1.0, 1.0, 1.0);" \
+		"}"
+	};
+
+	Shader::ShaderSource water_shader{
+		"#define SCALE 10.0\n" \
+		"uniform float uf_Time;" \
+		"float calculateSurface(float x, float z) {" \
+		"float y = 0.0;" \
+		"y += (sin(x * 1.0 / SCALE + uf_Time * 1.0) + sin(x * 2.3 / SCALE + uf_Time * 1.5) + sin(x * 3.3 / SCALE + uf_Time * 0.4)) / 3.0;" \
+		"y += (sin(z * 0.2 / SCALE + uf_Time * 1.8) + sin(z * 1.8 / SCALE + uf_Time * 1.8) + sin(z * 2.8 / SCALE + uf_Time * 0.8)) / 3.0;" \
+		"return y;" \
+		"}" \
+		"void main() {" \
+		"vec3 pos = VertexPosition;" \
+		"pos.y += 1.0 * calculateSurface(pos.x, pos.z);" \
+		"pos.y -= 1.0 * calculateSurface(0.0, 0.0);" \
+		"gl_Position = position(TransformProjectionMatrix, pos);" \
+		"}",
+
+		"#version 330 core\n" \
+		"out vec4 frag_Color;" \
+		"void main() {" \
+		"frag_Color = vec4(0.20, 0.59, 0.85, 1.00);" \
+		"}"
+	};
+
+	shader["std"] = std::make_shared<Shader>(std_shader);
+	shader["water"] = std::make_shared<Shader>(water_shader);
 	}
 
 }
@@ -61,7 +66,7 @@ namespace game {
 	Config* gameConfig;
 
 	// Camera
-	Camera  camera(vec3<float>(0.0f, 0.0f, 3.0f));
+	Camera  camera(vec3<float>(0.0f, 15.0f, 3.0f));
 	GLfloat lastX = 0.0f;
 	GLfloat lastY = 0.0f;
 	bool    keys[1024];
@@ -79,8 +84,8 @@ namespace game {
 	double mousePosY_down = 0;
 
 	mat4f projection = mat4f::perspective(45.0f, ((float)600 / (float)533), 0.1f, 100.0f);
-	mat4f transform = camera.GetViewMatrix();//mat4f::lookAt(vec3f(4.0f, 3.0f, -3.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
-
+	mat4f transform = camera.GetViewMatrix();
+	//mat4f transform = mat4f::lookAt(vec3f(4.0f, 25.0f, -100.0f), vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f));
 	//prototype
 	void initGameSettings();
 	void do_movement();
@@ -94,20 +99,23 @@ namespace game {
 		config->window.resizable = false;
 		config->window.vsyn = true;
 		gameConfig = config;
+		//initGameSettings();
 	}
 
 	void initGameSettings() {
 		GLfloat lastX = gameConfig->window.width / 2.0;
 		GLfloat lastY = gameConfig->window.height / 2.0;
 	}
-	PlaneBufferedGeometry plane;
+PlaneBufferedGeometry water;
+TerrainGeometry plane;
 
-	void load() {
-		printf("Load\n");
-		shaders::initialize();
+void load() {
+	printf("Load\n");
+	shaders::initialize();
 
-		plane = PlaneBufferedGeometry(100, 100, 100, 100);
-	}
+	water = PlaneBufferedGeometry(100, 100, 100, 100);
+	plane = TerrainGeometry(100, 100, 100, 100);
+}
 
 	void update() {
 		// Calculate deltatime of current frame
@@ -129,27 +137,43 @@ namespace game {
 		if (keys[GLFW_KEY_D])
 			camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
-	void draw2() {
+	
+	
+void draw() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	auto water_shader = shaders::shader["water"];
+	water_shader->attach();
+	water_shader->setMatrix4("uf_Projection", projection);
+	water_shader->setMatrix4("uf_Transform", transform);
+	water_shader->setMatrix4("uf_Model", mat4f::identity());
+	water_shader->setFloat("uf_Time", (float)glfwGetTime());
+	water.render();
+
+	auto std_shader = shaders::shader["std"];
+	std_shader->attach();
+	std_shader->setMatrix4("uf_Projection", projection);
+	std_shader->setMatrix4("uf_Transform", transform);
+	std_shader->setMatrix4("uf_Model", mat4f::identity());
+	plane.render();
+}
+
+void draw2() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		transform = camera.GetViewMatrix();
-		auto s = shaders::shader["std"];
-		s->attach();
-		s->setMatrix4("uf_Projection", projection);
-		s->setMatrix4("uf_Transform", transform);
-		s->setMatrix4("uf_Model", mat4f::identity());
-		s->setFloat("uf_Time", (float)glfwGetTime());
-		plane.render();
-	}
+		auto water_shader = shaders::shader["water"];
+		water_shader->attach();
+		water_shader->setMatrix4("uf_Projection", projection);
+		water_shader->setMatrix4("uf_Transform", transform);
+		water_shader->setMatrix4("uf_Model", mat4f::identity());
+		water_shader->setFloat("uf_Time", (float)glfwGetTime());
+		water.render();
 
-	void draw() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		auto s = shaders::shader["std"];
-		s->attach();
-		s->setMatrix4("uf_Projection", projection);
-		s->setMatrix4("uf_Transform", transform);
-		s->setMatrix4("uf_Model", mat4f::identity());
-		s->setFloat("uf_Time", (float)glfwGetTime());
+		auto std_shader = shaders::shader["std"];
+		std_shader->attach();
+		std_shader->setMatrix4("uf_Projection", projection);
+		std_shader->setMatrix4("uf_Transform", transform);
+		std_shader->setMatrix4("uf_Model", mat4f::identity());
 		plane.render();
 	}
 
@@ -160,6 +184,7 @@ namespace game {
 	void mousePressed(int x, int y, int button) {
 		printf("Mouse Pressed\n");
 		mouseButtonLeftDown = true;
+		mousePosY_down = y;
 	}
 
 	void mouseReleased(int x, int y, int button) {
@@ -190,9 +215,10 @@ namespace game {
 		keys[key] = false;
 	}
 	bool firstMouse = true;
-	void cursor_callback(GLFWwindow* window, double xpos, double ypos)
+	void cursor_callback( double xpos, double ypos)
 	{
-		//if (mouseButtonLeftDown) {
+		if (mouseButtonLeftDown) {
+			
 			if (firstMouse)
 			{
 				lastX = xpos;
@@ -203,12 +229,10 @@ namespace game {
 			GLfloat xoffset = xpos - lastX;
 			GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
 
-			lastX = xpos;
-			lastY = ypos;
-
-			camera.ProcessMouseMovement(xoffset, yoffset,false);
-		//}
-		
+			camera.ProcessMouseMovement(xoffset, yoffset);
+		}
+		lastX = xpos;
+		lastY = ypos;
 	}
 		
 }	// game
@@ -230,7 +254,7 @@ namespace game {
 		app->mouseReleased = &game::mouseReleased;
 		app->keyPressed = &game::keyPressed;
 		app->keyReleased = &game::keyReleased;
-
+		app->mouseMotion = &game::cursor_callback;
 		boot(app);
 		delete app;
 		return 0;

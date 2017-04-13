@@ -8,6 +8,20 @@
 
 Shader* Shader::current{ nullptr };
 
+std::string Shader::header{
+	"#version 330 core\n"
+	"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n"
+	"layout(location = 0) in vec3 VertexPosition;\n" \
+	"layout(location = 1) in vec3 VertexTexCoord;\n" \
+	"layout(location = 2) in vec3 VertexColor;\n"
+	"uniform mat4 uf_Projection;\n" \
+	"uniform mat4 uf_Transform;\n" \
+	"uniform mat4 uf_Model;\n"\
+	"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
+	"return transform_proj * vec4(vertpos.xyz, 1.0);" \
+	"}\n"
+};
+
 Shader::Shader(const ShaderSource& source) {
 	compile(source);
 }
@@ -53,7 +67,8 @@ void Shader::setMatrix4(const std::string& name, const mat4f& matrix) {
 void Shader::compile(const ShaderSource& source) {
 	// vertex shader
 	auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	const GLchar* vert = source.vertex.c_str();
+	auto concat = (Shader::header + source.vertex);
+	const GLchar* vert = concat.c_str();
 	glShaderSource(vertexShader, 1, (const GLchar**)&vert, NULL);
 	glCompileShader(vertexShader);
 

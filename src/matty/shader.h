@@ -20,6 +20,10 @@ public:
 public:
 	static Shader *current;
 
+private:
+	static std::string common;
+	static std::string header;
+
 public:
 	Shader() = default;
 	Shader(const ShaderSource& source);
@@ -48,8 +52,6 @@ public:
 
 private:
 	void compile(const ShaderSource& source);
-
-	
 
 private:
 	GLuint program;

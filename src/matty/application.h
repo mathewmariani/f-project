@@ -21,29 +21,7 @@ typedef struct {
 		bool vsyn : true;
 	} Window;
 
-	//typedef struct 
-	//{
-	//	GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
-	//	GLfloat lastFrame = 0.0f;  	// Time of last frame
-
-	//	GLfloat point_size = 11.0f;
-
-	//	// Camera
-	//	Camera  camera;
-	//	GLfloat lastX = 0.0;
-	//	GLfloat lastY= 0.0f;
-	//	bool    keys[1024];
-
-	//	bool mouseButtonLeftDown = false;
-	//	double mousePosY = 0;
-	//	double mousePosY_down = 0;
-
-	//	// Light attributes
-	//	vec3<float> lightPos;
-	//}GameSettings;
-
 	Window window;
-	//GameSettings gameSettings;
 } Config;
 
 typedef struct {
@@ -54,7 +32,7 @@ typedef struct {
 	void(*quit)() = nullptr;
 	void(*keyPressed)(int, int) = nullptr;
 	void(*keyReleased)(int, int) = nullptr;
-	void(*mouseMotion)() = nullptr;
+	void(*mouseMotion)(double, double) = nullptr;
 	void(*mousePressed)(int, int, int) = nullptr;
 	void(*mouseReleased)(int, int, int) = nullptr;
 } Application;
@@ -117,6 +95,11 @@ static void glfw_onMouse(GLFWwindow* window, int button, int action, int mods) {
 	}
 }
 
+static void glfw_OnCursorMove(GLFWwindow* window, double xpos, double ypos) {
+	Application* app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
+
+	app->mouseMotion(xpos, ypos);
+}
 static int boot(Application* app) {
 	if (app == nullptr) {
 		return 0;
@@ -177,6 +160,11 @@ static int boot(Application* app) {
 		// just for now
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		// vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
 		return true;
 	};
 
@@ -194,6 +182,6 @@ static int boot(Application* app) {
 	//glfwSetFramebufferSizeCallback(window, glfw_onResize);
 	glfwSetKeyCallback(window, glfw_onKey);
 	glfwSetMouseButtonCallback(window, glfw_onMouse);
-
+	glfwSetCursorPosCallback(window, glfw_OnCursorMove);
 	return run(app);
 }
