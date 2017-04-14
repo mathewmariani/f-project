@@ -2,6 +2,11 @@
 #include "matty/vec3.h"
 #include "opengl/gl3w.h"
 
+typedef struct {
+	float x, y, z;
+	float u, v;
+} Vertex;
+
 class BufferedGeometry {
 public:
 	virtual ~BufferedGeometry() = default;

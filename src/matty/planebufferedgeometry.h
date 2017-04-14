@@ -2,11 +2,6 @@
 
 #include "bufferedgeometry.h"
 
-typedef struct {
-	float x, y, z;
-	float u, v;
-} Vertex;
-
 class PlaneBufferedGeometry : public BufferedGeometry {
 public:
 	PlaneBufferedGeometry() = default;

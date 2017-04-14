@@ -37,20 +37,30 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 
 			double nx = j / ws - 0.5;
 			double ny = i / hs - 0.5;
-			//auto n = 1 * pn.GetHeight(2.42 * nx, 2.42 * ny);
 			auto n = 15 * perlin.octaveNoise0_1(i / fx, j / fy, 8);
 
 			auto x = j * segment_width - width_half;
-			vertices.push_back(x);
-			vertices.push_back(n);
-			vertices.push_back(-y);
+			//vertices.push_back(x);
+			//vertices.push_back(n);
+			//vertices.push_back(-y);
+
+			vertices.push_back({
+				x, (float)n, -y,
+				((float)j / ws), (1.0f - ((float)i / hs))
+			});
 		}
 	}
 
 	// buffer data
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+	// bind VertexPosition aatribute
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, x));
+
+	// bind VertexTexCoord attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
 
 	// element buffer object
 	glGenBuffers(1, &ebo);

@@ -12,7 +12,8 @@
 #include "matty/vec3.h"
 #include "matty/planebufferedgeometry.h"
 #include "matty/terraingeometry.h"
-#include"matty/camera.h"
+#include "matty/camera.h"
+#include "textures.h"
 
 
 namespace shaders {
@@ -35,6 +36,8 @@ void initialize() {
 	Shader::ShaderSource water_shader{
 		"#define SCALE 10.0\n" \
 		"uniform float uf_Time;" \
+		"out vec2 TexCoords;" \
+		"out float uTime;" \
 		"float calculateSurface(float x, float z) {" \
 		"float y = 0.0;" \
 		"y += (sin(x * 1.0 / SCALE + uf_Time * 1.0) + sin(x * 2.3 / SCALE + uf_Time * 1.5) + sin(x * 3.3 / SCALE + uf_Time * 0.4)) / 3.0;" \
@@ -42,6 +45,8 @@ void initialize() {
 		"return y;" \
 		"}" \
 		"void main() {" \
+		"uTime = uf_Time;" \
+		"TexCoords = VertexTexCoord;" \
 		"vec3 pos = VertexPosition;" \
 		"pos.y += 1.0 * calculateSurface(pos.x, pos.z);" \
 		"pos.y -= 1.0 * calculateSurface(0.0, 0.0);" \
@@ -49,12 +54,24 @@ void initialize() {
 		"}",
 
 		"#version 330 core\n" \
-		"out vec4 frag_Color;" \
+		"in vec2 TexCoords;" \
+		"in float uTime;" \
+		"uniform sampler2D uf_Image;" \
+		"out vec4 gl_FragColor;" \
 		"void main() {" \
-		"frag_Color = vec4(0.20, 0.59, 0.85, 1.00);" \
+		"vec2 uv = TexCoords * 10.0 + vec2(uTime * -0.05);" \
+		"uv.y += 0.01 * (sin(uv.x * 3.5 + uTime * 0.35) + sin(uv.x * 4.8 + uTime * 1.05) + sin(uv.x * 7.3 + uTime * 0.45)) / 3.0;" \
+		"uv.x += 0.12 * (sin(uv.y * 4.0 + uTime * 0.5) + sin(uv.y * 6.8 + uTime * 0.75) + sin(uv.y * 11.3 + uTime * 0.2)) / 3.0;" \
+		"uv.y += 0.12 * (sin(uv.x * 4.2 + uTime * 0.64) + sin(uv.x * 6.3 + uTime * 1.65) + sin(uv.x * 8.2 + uTime * 0.45)) / 3.0;" \
+		"vec4 tex1 = texture2D(uf_Image, uv * 1.0);"  \
+		"vec4 tex2 = texture2D(uf_Image, uv * 1.0 + vec2(0.2));"\
+		"vec3 blue = vec3(0.20, 0.59, 0.85);" \
+		"gl_FragColor = vec4(blue + vec3(tex1.a * 0.9 - tex2.a * 0.02), 1.0);" \
 		"}"
 	};
 
+	//		"gl_FragColor = vec4(0.20, 0.59, 0.85, 1.00) * texture(uf_Image, TexCoords);"
+	// 		"color = vec4(0.20, 0.59, 0.85, 1.00) * texture(uf_Image, TexCoords);"
 	shader["std"] = std::make_shared<Shader>(std_shader);
 	shader["water"] = std::make_shared<Shader>(water_shader);
 }
@@ -105,9 +122,13 @@ namespace game {
 		GLfloat lastX = gameConfig->window.width / 2.0;
 		GLfloat lastY = gameConfig->window.height / 2.0;
 	}
-	
+
+Textures* textureManager = new Textures;
+
 PlaneBufferedGeometry water;
 TerrainGeometry plane;
+Texture* water_texture;
+
 
 void load() {
 	printf("Load\n");
@@ -115,6 +136,8 @@ void load() {
 
 	water = PlaneBufferedGeometry(100, 100, 100, 100);
 	plane = TerrainGeometry(100, 100, 100, 100);
+	
+	water_texture = textureManager->get("water.png");
 }
 
 void update() {
