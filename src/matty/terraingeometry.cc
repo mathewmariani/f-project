@@ -37,7 +37,7 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 
 			double nx = j / ws - 0.5;
 			double ny = i / hs - 0.5;
-			auto n = 15 * perlin.octaveNoise0_1(i / fx, j / fy, 8);
+			auto n = perlin.octaveNoise0_1(i / fx, j / fy, 8);
 
 			auto x = j * segment_width - width_half;
 			//vertices.push_back(x);
@@ -45,8 +45,9 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 			//vertices.push_back(-y);
 
 			vertices.push_back({
-				x, (float)n, -y,
-				((float)j / ws), (1.0f - ((float)i / hs))
+				x, 15 * (float)n, -y,
+				((float)j / ws), (1.0f - ((float)i / hs)),
+				0.0f, 0.0f, 0.0f, (float)n
 			});
 		}
 	}
@@ -61,6 +62,10 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 	// bind VertexTexCoord attribute
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
+	
+	// bind VertexColor attribute
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, r));
 
 	// element buffer object
 	glGenBuffers(1, &ebo);

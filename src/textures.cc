@@ -41,7 +41,6 @@ Texture Textures::load(const std::string& name) {
 	texture.height = h;
 
 	glEnable (GL_TEXTURE_2D);
-
 	glBindTexture (GL_TEXTURE_2D, textureId);
 
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -53,6 +52,7 @@ Texture Textures::load(const std::string& name) {
 
 	glDisable (GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
 	SOIL_free_image_data(image);
 
 	return texture;

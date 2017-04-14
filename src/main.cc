@@ -70,10 +70,36 @@ void initialize() {
 		"}"
 	};
 
-	//		"gl_FragColor = vec4(0.20, 0.59, 0.85, 1.00) * texture(uf_Image, TexCoords);"
-	// 		"color = vec4(0.20, 0.59, 0.85, 1.00) * texture(uf_Image, TexCoords);"
+	Shader::ShaderSource terrain_shader{
+		"out vec2 TexCoords;" \
+		"out vec4 VertColor;" \
+		"void main() {" \
+		"VertColor = VertexColor;" \
+		"TexCoords = VertexTexCoord;" \
+		"gl_Position = position(TransformProjectionMatrix, VertexPosition);" \
+		"}",
+
+		"#version 330 core\n" \
+		"in vec2 TexCoords;" \
+		"in vec4 VertColor;" \
+		"uniform sampler2D uf_Rock;" \
+		"uniform sampler2D uf_Grass;" \
+		"uniform sampler2D uf_Ice;" \
+		"out vec4 gl_FragColor;" \
+		"void main() {" \
+		"vec4 texRock = texture2D(uf_Rock, TexCoords * 10.0);" \
+		"vec4 texGrass = texture2D(uf_Grass, TexCoords * 10.0);" \
+		"vec4 texIce = texture2D(uf_Ice, TexCoords * 10.0);" \
+		"if (VertColor.a > 0.7) { gl_FragColor = texIce; }" \
+		"else if (VertColor.a > 0.4) { gl_FragColor = texRock; }" \
+		"else { gl_FragColor = texGrass; }" \
+		"}"
+	};
+
+
 	shader["std"] = std::make_shared<Shader>(std_shader);
 	shader["water"] = std::make_shared<Shader>(water_shader);
+	shader["terrain"] = std::make_shared<Shader>(terrain_shader);
 }
 }
 
@@ -127,8 +153,12 @@ Textures* textureManager = new Textures;
 
 PlaneBufferedGeometry water;
 TerrainGeometry plane;
-Texture* water_texture;
 
+
+Texture* water_texture;
+Texture* grass_texture;
+Texture* rock_texture;
+Texture* ice_texture;
 
 void load() {
 	printf("Load\n");
@@ -138,6 +168,9 @@ void load() {
 	plane = TerrainGeometry(100, 100, 100, 100);
 	
 	water_texture = textureManager->get("water.png");
+	grass_texture = textureManager->get("grass.png");
+	rock_texture = textureManager->get("rock.png");
+	ice_texture = textureManager->get("ice.png");
 }
 
 void update() {
@@ -166,12 +199,23 @@ void do_movement()
 void draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+
 	auto water_shader = shaders::shader["water"];
 	water_shader->attach();
 	water_shader->setMatrix4("uf_Projection", projection);
 	water_shader->setMatrix4("uf_Transform", transform);
 	water_shader->setMatrix4("uf_Model", mat4f::identity());
+	water_shader->setInteger("uf_Image", 0);
 	water_shader->setFloat("uf_Time", (float)glfwGetTime());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, water_texture->handle);
+
+	printf("%d\n", water_texture->handle);
+	printf("%d\n", grass_texture->handle);
+	printf("%d\n", rock_texture->handle);
+
 	water.render();
 
 	auto std_shader = shaders::shader["std"];
@@ -190,14 +234,31 @@ void draw2() {
 		water_shader->setMatrix4("uf_Projection", projection);
 		water_shader->setMatrix4("uf_Transform", transform);
 		water_shader->setMatrix4("uf_Model", mat4f::identity());
+		water_shader->setInteger("uf_Image", 0);
 		water_shader->setFloat("uf_Time", (float)glfwGetTime());
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, water_texture->handle);
+
 		water.render();
 
-		auto std_shader = shaders::shader["std"];
+		auto std_shader = shaders::shader["terrain"];
 		std_shader->attach();
 		std_shader->setMatrix4("uf_Projection", projection);
 		std_shader->setMatrix4("uf_Transform", transform);
 		std_shader->setMatrix4("uf_Model", mat4f::identity());
+		std_shader->setInteger("uf_Rock", 0);
+		std_shader->setInteger("uf_Grass", 1);
+		std_shader->setInteger("uf_Ice", 2);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, rock_texture->handle);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, grass_texture->handle);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, ice_texture->handle);
+
 		plane.render();
 	}
 
