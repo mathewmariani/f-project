@@ -82,17 +82,51 @@ void initialize() {
 		"#version 330 core\n" \
 		"in vec2 TexCoords;" \
 		"in vec4 VertColor;" \
+		"uniform sampler2D uf_Ice;" \
+		"uniform sampler2D uf_Stone;" \
 		"uniform sampler2D uf_Rock;" \
 		"uniform sampler2D uf_Grass;" \
-		"uniform sampler2D uf_Ice;" \
+		"uniform sampler2D uf_Sand;" \
 		"out vec4 gl_FragColor;" \
+		"vec4 GenerateTerrainColor() {" \
+		"vec4 terrainColor = vec4(0.0, 0.0, 0.0, 1.0);" \
+		"float height = VertColor.a;" \
+		"float regionMin = 0.0;" \
+		"float regionMax = 0.0;" \
+		"float regionRange = 0.0;" \
+		"float regionWeight = 0.0;" \
+		"/* ice */" \
+		"regionMin = 0.75;" \
+		"regionMax = 1.0;" \
+		"regionRange = regionMax - regionMin;" \
+		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
+		"regionWeight = max(0.0, regionWeight);" \
+		"terrainColor += regionWeight * texture2D(uf_Ice, TexCoords * 16.0);" \
+		"/* stone */" \
+		"regionMin = 0.35;" \
+		"regionMax = 0.8;" \
+		"regionRange = regionMax - regionMin;" \
+		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
+		"regionWeight = max(0.0, regionWeight);" \
+		"terrainColor += regionWeight * texture2D(uf_Stone, TexCoords * 16.0);" \
+		"/* grass */" \
+		"regionMin = 0.0;" \
+		"regionMax = 0.36;" \
+		"regionRange = regionMax - regionMin;" \
+		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
+		"regionWeight = max(0.0, regionWeight);" \
+		"terrainColor += regionWeight * texture2D(uf_Grass, TexCoords * 16.0);" \
+		"/* sand */" \
+		"regionMin = 0.0;" \
+		"regionMax = 0.15;" \
+		"regionRange = regionMax - regionMin;" \
+		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
+		"regionWeight = max(0.0, regionWeight);" \
+		"terrainColor += regionWeight * texture2D(uf_Sand, TexCoords * 16.0);" \
+		"return terrainColor;" \
+		"}" \
 		"void main() {" \
-		"vec4 texRock = texture2D(uf_Rock, TexCoords * 10.0);" \
-		"vec4 texGrass = texture2D(uf_Grass, TexCoords * 10.0);" \
-		"vec4 texIce = texture2D(uf_Ice, TexCoords * 10.0);" \
-		"if (VertColor.a > 0.7) { gl_FragColor = texIce; }" \
-		"else if (VertColor.a > 0.4) { gl_FragColor = texRock; }" \
-		"else { gl_FragColor = texGrass; }" \
+		"gl_FragColor = GenerateTerrainColor();" \
 		"}"
 	};
 
@@ -155,10 +189,12 @@ PlaneBufferedGeometry water;
 TerrainGeometry plane;
 
 
-Texture* water_texture;
-Texture* grass_texture;
-Texture* rock_texture;
 Texture* ice_texture;
+Texture* stone_texture;
+Texture* rock_texture;
+Texture* grass_texture;
+Texture* sand_texture;
+Texture* water_texture;
 
 void load() {
 	printf("Load\n");
@@ -167,10 +203,14 @@ void load() {
 	water = PlaneBufferedGeometry(100, 100, 100, 100);
 	plane = TerrainGeometry(100, 100, 100, 100);
 	
-	water_texture = textureManager->get("water.png");
-	grass_texture = textureManager->get("grass.png");
-	rock_texture = textureManager->get("rock.png");
+	
 	ice_texture = textureManager->get("ice.png");
+	stone_texture = textureManager->get("stone.png");
+	rock_texture = textureManager->get("rock.png");
+	grass_texture = textureManager->get("grass.png");
+	sand_texture = textureManager->get("sand.png");
+	
+	water_texture = textureManager->get("water.png");
 }
 
 void update() {
@@ -247,17 +287,26 @@ void draw2() {
 		std_shader->setMatrix4("uf_Projection", projection);
 		std_shader->setMatrix4("uf_Transform", transform);
 		std_shader->setMatrix4("uf_Model", mat4f::identity());
-		std_shader->setInteger("uf_Rock", 0);
-		std_shader->setInteger("uf_Grass", 1);
-		std_shader->setInteger("uf_Ice", 2);
+		std_shader->setInteger("uf_Ice", 0);
+		std_shader->setInteger("uf_Stone", 1);
+		std_shader->setInteger("uf_Rock", 2);
+		std_shader->setInteger("uf_Grass", 3);
+		std_shader->setInteger("uf_Sand", 4);
+
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, rock_texture->handle);
+		glBindTexture(GL_TEXTURE_2D, ice_texture->handle);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, grass_texture->handle);
+		glBindTexture(GL_TEXTURE_2D, stone_texture->handle);
 
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, ice_texture->handle);
+		glBindTexture(GL_TEXTURE_2D, rock_texture->handle);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, grass_texture->handle);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, sand_texture->handle);
 
 		plane.render();
 	}
