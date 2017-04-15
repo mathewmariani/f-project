@@ -9,8 +9,8 @@
 Shader* Shader::current{ nullptr };
 
 std::string Shader::header{
-	"#version 330 core\n"
-	"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n"
+	"#version 330 core\n" \
+	"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n" \
 	"layout(location = 0) in vec3 VertexPosition;\n" \
 	"layout(location = 1) in vec2 VertexTexCoord;\n" \
 	"layout(location = 2) in vec4 VertexColor;\n" \
@@ -71,7 +71,7 @@ void Shader::compile(const ShaderSource& source) {
 	// vertex shader
 	auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	auto concat = (Shader::header + source.vertex);
-	const GLchar* vert = concat.c_str();
+	const GLchar* vert = source.vertex.c_str();
 	glShaderSource(vertexShader, 1, (const GLchar**)&vert, NULL);
 	glCompileShader(vertexShader);
 

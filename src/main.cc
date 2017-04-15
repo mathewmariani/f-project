@@ -14,6 +14,7 @@
 #include "matty/terraingeometry.h"
 #include "matty/camera.h"
 #include "textures.h"
+#include "libraries/biscuit.h"
 
 
 namespace shaders {
@@ -33,7 +34,30 @@ void initialize() {
 		"}"
 	};
 
+	//auto water = biscuit::createShader(
+	//	biscuit::glsl.default[0], biscuit::glsl.default[1]
+	//	);
+
+	//std::cout << water.first << std::endl;
+	//std::cout << water.second << std::endl;
+
+	//
+	//Shader::ShaderSource water_shader{
+	//	biscuit::glsl.default[0], biscuit::glsl.default[1]
+	//};
+
 	Shader::ShaderSource water_shader{
+		"#version 330 core\n" \
+		"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n" \
+		"layout(location = 0) in vec3 VertexPosition;\n" \
+		"layout(location = 1) in vec2 VertexTexCoord;\n" \
+		"layout(location = 2) in vec4 VertexColor;\n" \
+		"uniform mat4 uf_Projection;\n" \
+		"uniform mat4 uf_Transform;\n" \
+		"uniform mat4 uf_Model;\n"\
+		"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
+		"return transform_proj * vec4(vertpos.xyz, 1.0);" \
+		"}\n" \
 		"#define SCALE 10.0\n" \
 		"uniform float uf_Time;" \
 		"out vec2 TexCoords;" \
@@ -59,7 +83,7 @@ void initialize() {
 		"uniform sampler2D uf_Image;" \
 		"out vec4 gl_FragColor;" \
 		"void main() {" \
-		"vec2 uv = TexCoords * 10.0 + vec2(uTime * -0.05);" \
+		"vec2 uv = TexCoords * 16.0 + vec2(uTime * -0.05);" \
 		"uv.y += 0.01 * (sin(uv.x * 3.5 + uTime * 0.35) + sin(uv.x * 4.8 + uTime * 1.05) + sin(uv.x * 7.3 + uTime * 0.45)) / 3.0;" \
 		"uv.x += 0.12 * (sin(uv.y * 4.0 + uTime * 0.5) + sin(uv.y * 6.8 + uTime * 0.75) + sin(uv.y * 11.3 + uTime * 0.2)) / 3.0;" \
 		"uv.y += 0.12 * (sin(uv.x * 4.2 + uTime * 0.64) + sin(uv.x * 6.3 + uTime * 1.65) + sin(uv.x * 8.2 + uTime * 0.45)) / 3.0;" \
@@ -71,6 +95,17 @@ void initialize() {
 	};
 
 	Shader::ShaderSource terrain_shader{
+		"#version 330 core\n" \
+		"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n" \
+		"layout(location = 0) in vec3 VertexPosition;\n" \
+		"layout(location = 1) in vec2 VertexTexCoord;\n" \
+		"layout(location = 2) in vec4 VertexColor;\n" \
+		"uniform mat4 uf_Projection;\n" \
+		"uniform mat4 uf_Transform;\n" \
+		"uniform mat4 uf_Model;\n"\
+		"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
+		"return transform_proj * vec4(vertpos.xyz, 1.0);" \
+		"}\n" \
 		"out vec2 TexCoords;" \
 		"out vec4 VertColor;" \
 		"void main() {" \
@@ -130,10 +165,87 @@ void initialize() {
 		"}"
 	};
 
+	Shader::ShaderSource test_shader{
+		"#version 330 core\n" \
+		"layout(location = 0) in vec3 VertexPosition;" \
+		"layout(location = 1) in vec2 VertexTexCoord;" \
+		"layout(location = 2) in vec4 VertexColor;" \
+		"uniform mat4 uProjection;" \
+		"uniform mat4 uView;" \
+		"uniform mat4 uModel;" \
+		"out vec3 VertPosition;" \
+		"out vec2 TexCoord;" \
+		"out vec4 VertColor;" \
+		"vec4 position(mat4 transform_proj, vec4 vertpos) {return transform_proj * vertpos;}" \
+		"void main() {" \
+		"VertPosition = VertexPosition;" \
+		"TexCoord = VertexTexCoord;" \
+		"VertColor = VertexColor;" \
+		"vec4 vertpos = vec4(VertexPosition.xyz, 1.0);" \
+		"gl_Position = position((uProjection * uView * uModel), vertpos);" \
+		"}",
 
-	shader["std"] = std::make_shared<Shader>(std_shader);
+		"#version 330 core\n" \
+		"in vec3 VertPosition;" \
+		"in vec2 TexCoord;" \
+		"in vec4 VertColor;" \
+		"out vec4 FragColor;" \
+		"vec4 effect(vec4 vcolor) {return vcolor;}" \
+		"void main() {" \
+		"FragColor = effect(VertColor);" \
+		"}"
+	};
+
+	//"#version 330 core\n" \
+	//"in vec2 TexCoords;" \
+	//"in float uTime;" \
+	//"uniform sampler2D uf_Image;" \
+	//"out vec4 gl_FragColor;" \
+	//"void main() {" \
+	//"vec2 uv = TexCoords * 16.0 + vec2(uTime * -0.05);" \
+	//"uv.y += 0.01 * (sin(uv.x * 3.5 + uTime * 0.35) + sin(uv.x * 4.8 + uTime * 1.05) + sin(uv.x * 7.3 + uTime * 0.45)) / 3.0;" \
+	//"uv.x += 0.12 * (sin(uv.y * 4.0 + uTime * 0.5) + sin(uv.y * 6.8 + uTime * 0.75) + sin(uv.y * 11.3 + uTime * 0.2)) / 3.0;" \
+	//"uv.y += 0.12 * (sin(uv.x * 4.2 + uTime * 0.64) + sin(uv.x * 6.3 + uTime * 1.65) + sin(uv.x * 8.2 + uTime * 0.45)) / 3.0;" \
+	//"vec4 tex1 = texture2D(uf_Image, uv * 1.0);"  \
+	//"vec4 tex2 = texture2D(uf_Image, uv * 1.0 + vec2(0.2));"\
+	//"vec3 blue = vec3(0.20, 0.59, 0.85);" \
+	//"gl_FragColor = vec4(blue + vec3(tex1.a * 0.9 - tex2.a * 0.02), 1.0);" \
+	//"}"
+
+	auto s = biscuit::createShader(
+		"uniform float uf_Time;" \
+		"float calculateSurface(float x, float z) {" \
+		"float y = 0.0;" \
+		"y += (sin(x * 1.0 / 10 + uf_Time * 1.0) + sin(x * 2.3 / 10 + uf_Time * 1.5) + sin(x * 3.3 / 10 + uf_Time * 0.4)) / 3.0;" \
+		"y += (sin(z * 0.2 / 10 + uf_Time * 1.8) + sin(z * 1.8 / 10 + uf_Time * 1.8) + sin(z * 2.8 / 10 + uf_Time * 0.8)) / 3.0;" \
+		"return y;" \
+		"}" \
+		"vec4 position(mat4 transform_proj, vec4 vertpos) {" \
+		"vec4 pos = vertpos;" \
+		"pos.y += 1.0 * calculateSurface(pos.x, pos.z);" \
+		"pos.y -= 1.0 * calculateSurface(0.0, 0.0);" \
+		"return (transform_proj * pos);" \
+		"}",
+
+		"uniform sampler2D uf_Image;" \
+		"vec4 effect(vec4 vcolor) {" \
+		"vec4 tex1 = texture2D(uf_Image, TexCoord);" \
+		"vec4 tex2 = texture2D(uf_Image, TexCoord);" \
+		"vec3 blue = vec3(0.20, 0.59, 0.85);" \
+		"return vec4(blue + vec3(tex1.a * 0.9 - tex2.a * 0.02), 1.0);" \
+		"}"
+		);
+	Shader::ShaderSource test_shader2{
+		s.first, s.second		
+	};
+
+	std::cout << test_shader2.vertex << std::endl;
+	std::cout << test_shader2.fragment << std::endl;
+
 	shader["water"] = std::make_shared<Shader>(water_shader);
 	shader["terrain"] = std::make_shared<Shader>(terrain_shader);
+	shader["test"] = std::make_shared<Shader>(test_shader);
+	shader["test2"] = std::make_shared<Shader>(test_shader2);
 }
 }
 
@@ -237,43 +349,16 @@ void do_movement()
 	
 	
 void draw() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-
-	auto water_shader = shaders::shader["water"];
-	water_shader->attach();
-	water_shader->setMatrix4("uf_Projection", projection);
-	water_shader->setMatrix4("uf_Transform", transform);
-	water_shader->setMatrix4("uf_Model", mat4f::identity());
-	water_shader->setInteger("uf_Image", 0);
-	water_shader->setFloat("uf_Time", (float)glfwGetTime());
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, water_texture->handle);
-
-	printf("%d\n", water_texture->handle);
-	printf("%d\n", grass_texture->handle);
-	printf("%d\n", rock_texture->handle);
-
-	water.render();
-
-	auto std_shader = shaders::shader["std"];
-	std_shader->attach();
-	std_shader->setMatrix4("uf_Projection", projection);
-	std_shader->setMatrix4("uf_Transform", transform);
-	std_shader->setMatrix4("uf_Model", mat4f::identity());
-	plane.render();
 }
 
 void draw2() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		transform = camera.GetViewMatrix();
-		auto water_shader = shaders::shader["water"];
+		auto water_shader = shaders::shader["test2"];
 		water_shader->attach();
-		water_shader->setMatrix4("uf_Projection", projection);
-		water_shader->setMatrix4("uf_Transform", transform);
-		water_shader->setMatrix4("uf_Model", mat4f::identity());
+		water_shader->setMatrix4("uProjection", projection);
+		water_shader->setMatrix4("uView", transform);
+		water_shader->setMatrix4("uModel", mat4f::identity());
 		water_shader->setInteger("uf_Image", 0);
 		water_shader->setFloat("uf_Time", (float)glfwGetTime());
 
@@ -282,16 +367,16 @@ void draw2() {
 
 		water.render();
 
-		auto std_shader = shaders::shader["terrain"];
-		std_shader->attach();
-		std_shader->setMatrix4("uf_Projection", projection);
-		std_shader->setMatrix4("uf_Transform", transform);
-		std_shader->setMatrix4("uf_Model", mat4f::identity());
-		std_shader->setInteger("uf_Ice", 0);
-		std_shader->setInteger("uf_Stone", 1);
-		std_shader->setInteger("uf_Rock", 2);
-		std_shader->setInteger("uf_Grass", 3);
-		std_shader->setInteger("uf_Sand", 4);
+		auto terrain_shader = shaders::shader["terrain"];
+		terrain_shader->attach();
+		terrain_shader->setMatrix4("uf_Projection", projection);
+		terrain_shader->setMatrix4("uf_Transform", transform);
+		terrain_shader->setMatrix4("uf_Model", mat4f::identity());
+		terrain_shader->setInteger("uf_Ice", 0);
+		terrain_shader->setInteger("uf_Stone", 1);
+		terrain_shader->setInteger("uf_Rock", 2);
+		terrain_shader->setInteger("uf_Grass", 3);
+		terrain_shader->setInteger("uf_Sand", 4);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, ice_texture->handle);

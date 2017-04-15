@@ -40,6 +40,7 @@ set(PROJECT_SOURCE
 	src/libraries/soil/stb_image_aug.h
 	src/libraries/soil/stbi_DDS_aug_c.h
 	src/libraries/soil/stbi_DDS_aug.h
+	src/libraries/biscuit.h
 	src/libraries/noise.h
 	src/libraries/perlinnoise.cpp
 	src/libraries/perlinnoise.h
