@@ -1,4 +1,5 @@
 #include <iostream>
+#include <math.h>
 #include <vector>
 #include "terraingeometry.h"
 
@@ -27,6 +28,7 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 	//pn.Set(1.0, 1.0, 1.0, 1.0, 255);
 
 	const siv::PerlinNoise perlin(12345);
+	const double frequency = 2.50;
 	const double fx = w / 8.0;
 	const double fy = h / 8.0;
 
@@ -37,7 +39,8 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 
 			double nx = j / ws - 0.5;
 			double ny = i / hs - 0.5;
-			auto n = perlin.octaveNoise0_1(i / fx, j / fy, 8);
+			auto e = perlin.octaveNoise0_1(i / fx, j / fy, 8);
+			auto n = std::pow(e, 2.5);
 
 			auto x = j * segment_width - width_half;
 			//vertices.push_back(x);
@@ -47,7 +50,7 @@ TerrainGeometry::TerrainGeometry(int w, int h, int ws, int hs) {
 			vertices.push_back({
 				x, 15 * (float)n, -y,
 				((float)j / ws), (1.0f - ((float)i / hs)),
-				0.0f, 0.0f, 0.0f, (float)n
+				0.0f, 0.0f, 0.0f, (float)e
 			});
 		}
 	}
