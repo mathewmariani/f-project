@@ -1,5 +1,5 @@
 /**
-* biscuit
+* biscuit.h
 *
 * Copyright (c) 2017 Mathew Mariani
 *
@@ -17,22 +17,7 @@
 
 namespace biscuit {
 
-// shader stage
-enum { GLSL_VERTEX, GLSL_FRAGMENT };
-
-//std::string Shader::header{
-//	"#version 330 core\n"
-//	"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n"
-//	"layout(location = 0) in vec3 VertexPosition;\n" \
-//	"layout(location = 1) in vec2 VertexTexCoord;\n" \
-//	"layout(location = 2) in vec4 VertexColor;\n" \
-//	"uniform mat4 uf_Projection;\n" \
-//	"uniform mat4 uf_Transform;\n" \
-//	"uniform mat4 uf_Model;\n"\
-//	"vec4 position(mat4 transform_proj, vec3 vertpos) {" \
-//	"return transform_proj * vec4(vertpos.xyz, 1.0);" \
-//	"}\n"
-//};
+namespace detail {
 
 // shader code table
 struct GLSL {
@@ -40,21 +25,21 @@ struct GLSL {
 		"#version 330 core\n";
 	std::array<std::string, 2> header = {
 		// vertex
-		"layout(location = 0) in vec3 VertexPosition;" \
-		"layout(location = 1) in vec2 VertexTexCoord;" \
-		"layout(location = 2) in vec4 VertexColor;" \
-		"uniform mat4 uProjection;" \
-		"uniform mat4 uView;" \
-		"uniform mat4 uModel;" \
-		"out vec3 VertPosition;" \
-		"out vec2 TexCoord;" \
-		"out vec4 VertColor;",
+		"layout(location = 0) in vec3 VertexPosition;\n" \
+		"layout(location = 1) in vec2 VertexTexCoord;\n" \
+		"layout(location = 2) in vec4 VertexColor;\n" \
+		"uniform mat4 uProjection;\n" \
+		"uniform mat4 uView;\n" \
+		"uniform mat4 uModel;\n"\
+		"out vec3 VertPosition;\n" \
+		"out vec2 TexCoord;\n" \
+		"out vec4 VertColor;\n",
 
 		// fragment
-		"in vec3 VertPosition;" \
-		"in vec2 TexCoord;" \
-		"in vec4 VertColor;" \
-		"out vec4 FragColor;"
+		"in vec3 VertPosition;\n" \
+		"in vec2 TexCoord;\n" \
+		"in vec4 VertColor;\n" \
+		"out vec4 FragColor;\n"
 	};
 	std::array<std::string, 2> default = {
 		// vertex
@@ -69,18 +54,18 @@ struct GLSL {
 	};
 	std::array<std::string, 2> main = {
 		// vertex
-		"void main() {" \
-		"VertPosition = VertexPosition;" \
-		"TexCoord = VertexTexCoord;" \
-		"VertColor = VertexColor;" \
-		"vec4 vertpos = vec4(VertexPosition.xyz, 1.0);" \
-		"gl_Position = position((uProjection * uView * uModel), vertpos);" \
-		"}",
-		
+		"void main() {\n" \
+		"VertPosition = VertexPosition;\n" \
+		"TexCoord = VertexTexCoord;\n" \
+		"VertColor = VertexColor;\n" \
+		"vec4 vertpos = vec4(VertexPosition.xyz, 1.0);\n" \
+		"gl_Position = position((uProjection * uView * uModel), vertpos);\n" \
+		"}\n",
+
 		// fragment
-		"void main() {" \
-		"FragColor = effect(VertColor);" \
-		"}"
+		"void main() {\n" \
+		"FragColor = effect(VertColor);\n" \
+		"}\n"
 	};
 } glsl;
 
@@ -104,18 +89,49 @@ auto isFragmentShader(const std::string& src) noexcept {
 	return std::regex_match(src, r);
 }
 
-auto createShader(const std::string& vertex, const std::string& fragment) {
-	if (!isVertexShader(vertex)) {
-		throw std::logic_error("Could not parse vertex stage shader code.");
+}	// detail
+
+	// shader stage
+enum { GLSL_VERTEX, GLSL_FRAGMENT };
+
+// case 1:
+//	both vert and frag are present
+//	-> check both
+//	-> create shader
+// case 2:
+//	vert, or frag is present
+//	-> check which is present
+//	-> use default for missing
+//	-> create shader
+// case 3:
+//	neither is present
+//	-> use default for both
+//	-> create shader
+auto createShader(const std::string& arg1 = std::string(), const std::string& arg2 = std::string()) {
+	auto vertex = detail::glsl.default[0], fragment = detail::glsl.default[1];
+	if (!arg1.empty()) {
+		if (detail::isVertexShader(arg1)) {
+			vertex = arg1;
+		} else if (detail::isFragmentShader(arg1)) {
+			fragment = arg1;
+		} else {
+			throw std::logic_error("Could not parse fragment stage shader code.");
+		}
 	}
 
-	if (!isFragmentShader(fragment)) {
-		throw std::logic_error("Could not parse fragment stage shader code.");
+	if (!arg2.empty()) {
+		if (detail::isVertexShader(arg2)) {
+			vertex = arg2;
+		} else if (detail::isFragmentShader(arg2)) {
+			fragment = arg2;
+		} else {
+			throw std::logic_error("Could not parse fragment stage shader code.");
+		}
 	}
 
 	return std::make_pair(
-		createShaderCode(GLSL_VERTEX, vertex),
-		createShaderCode(GLSL_FRAGMENT, fragment)
+		detail::createShaderCode(GLSL_VERTEX, vertex),
+		detail::createShaderCode(GLSL_FRAGMENT, fragment)
 		);
 }
 

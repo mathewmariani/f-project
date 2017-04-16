@@ -24,10 +24,6 @@ std::unordered_map<std::string, std::shared_ptr<Shader>> shader;
 void initialize() {
 
 	auto terrain = biscuit::createShader(
-		"vec4 position(mat4 transform_proj, vec4 vertpos) {" \
-		"return transform_proj * vertpos;" \
-		"}",
-
 		"uniform sampler2D uf_Ice;" \
 		"uniform sampler2D uf_Stone;" \
 		"uniform sampler2D uf_Rock;" \
