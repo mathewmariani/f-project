@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <math.h>
 
 template <typename T, const std::size_t length>
 inline vecn<T, length>::vecn() {
@@ -125,7 +126,7 @@ inline void vecn<T, length>::operator /= (const T& s) {
 
 template <typename T, const std::size_t length>
 inline T vecn<T, length>::angle(const vecn<T, length>& a, const vecn<T, length>& b) {
-	return (std::acos(dot(a, b) / (magnitude(a) * magnitude(b))) / 0.0174533f);
+	return (acos(dot(a, b) / (magnitude(a) * magnitude(b))) / 0.0174533f);
 }
 
 template <typename T, const std::size_t length>
@@ -134,7 +135,7 @@ inline T vecn<T, length>::distance(const vecn<T, length>& a, const vecn<T, lengt
 	for (auto i = 0; i < length; ++i) {
 		sum += ((a[i] - b[i])*(a[i] - b[i]));
 	}
-	return (T)std::sqrt(sum);
+	return (T)sqrt(sum);
 }
 
 template <typename T, const std::size_t length>
@@ -152,7 +153,7 @@ inline T vecn<T, length>::magnitude(const vecn<T, length>& v) {
 	for (auto i = 0; i < length; ++i) {
 		sum += (v[i] * v[i]);
 	}
-	return (T)std::sqrt(sum);
+	return (T)sqrt(sum);
 }
 
 template <typename T, const std::size_t length>

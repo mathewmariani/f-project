@@ -5,8 +5,8 @@
 #include <cmath>
 // GL Includes
 #include <opengl/gl3w.h>
-#include "matty/mat4.h"
-#include "matty/vec3.h"
+#include "libraries/mat4.h"
+#include "libraries/vec3.h"
 
 //#include "..\glm\glm.hpp"
 //#include "..\glm\gtc/matrix_transform.hpp"	// matrix types

@@ -23,25 +23,25 @@ namespace detail {
 struct GLSL {
 	std::string version = \
 		"#version 330 core\n";
-	std::array<std::string, 2> header = {
+  std::array<std::string, 2> header{{
 		// vertex
-		"layout(location = 0) in vec3 VertexPosition;\n" \
-		"layout(location = 1) in vec2 VertexTexCoord;\n" \
-		"layout(location = 2) in vec4 VertexColor;\n" \
-		"uniform mat4 uProjection;\n" \
-		"uniform mat4 uView;\n" \
-		"uniform mat4 uModel;\n"\
-		"out vec3 VertPosition;\n" \
-		"out vec2 TexCoord;\n" \
-		"out vec4 VertColor;\n",
+		"layout(location = 0) in vec3 VertexPosition;" \
+		"layout(location = 1) in vec2 VertexTexCoord;" \
+		"layout(location = 2) in vec4 VertexColor;" \
+		"uniform mat4 uProjection;" \
+		"uniform mat4 uView;" \
+		"uniform mat4 uModel;"\
+		"out vec3 VertPosition;" \
+		"out vec2 TexCoord;" \
+		"out vec4 VertColor;",
 
-		// fragment
-		"in vec3 VertPosition;\n" \
-		"in vec2 TexCoord;\n" \
-		"in vec4 VertColor;\n" \
-		"out vec4 FragColor;\n"
-	};
-	std::array<std::string, 2> default = {
+    // fragment
+		"in vec3 VertPosition;" \
+		"in vec2 TexCoord;" \
+		"in vec4 VertColor;" \
+		"out vec4 FragColor;"
+		}};
+	std::array<std::string, 2> std{{
 		// vertex
 		"vec4 position(mat4 transform_proj, vec4 vertpos) {" \
 		"return transform_proj * vertpos;" \
@@ -51,25 +51,25 @@ struct GLSL {
 		"vec4 effect(vec4 vcolor) {" \
 		"return vcolor;" \
 		"}"
-	};
-	std::array<std::string, 2> main = {
+		}};
+  std::array<std::string, 2> main{{
 		// vertex
-		"void main() {\n" \
-		"VertPosition = VertexPosition;\n" \
-		"TexCoord = VertexTexCoord;\n" \
-		"VertColor = VertexColor;\n" \
-		"vec4 vertpos = vec4(VertexPosition.xyz, 1.0);\n" \
-		"gl_Position = position((uProjection * uView * uModel), vertpos);\n" \
-		"}\n",
+		"void main() {" \
+		"VertPosition = VertexPosition;" \
+		"TexCoord = VertexTexCoord;" \
+		"VertColor = VertexColor;" \
+		"vec4 vertpos = vec4(VertexPosition.xyz, 1.0);" \
+		"gl_Position = position((uProjection * uView * uModel), vertpos);" \
+		"}",
 
 		// fragment
-		"void main() {\n" \
-		"FragColor = effect(VertColor);\n" \
-		"}\n"
-	};
+		"void main() {" \
+		"FragColor = effect(VertColor);" \
+		"}"
+		}};
 } glsl;
 
-auto createShaderCode(int stage, const std::string& code) noexcept {
+std::string createShaderCode(int stage, const std::string& code) noexcept {
 	return std::string{
 		glsl.version + "\n" +
 		glsl.header[stage] + "\n" +
@@ -78,13 +78,12 @@ auto createShaderCode(int stage, const std::string& code) noexcept {
 	};
 }
 
-auto isVertexShader(const std::string& src) noexcept {
-	std::regex_constants::basic;
+bool isVertexShader(const std::string& src) noexcept {
 	std::regex r("^.*vec4\\s+position\\s*.*$");
 	return std::regex_match(src, r);
 }
 
-auto isFragmentShader(const std::string& src) noexcept {
+bool isFragmentShader(const std::string& src) noexcept {
 	std::regex r("^.*vec4\\s+effect\\s*.*$");
 	return std::regex_match(src, r);
 }
@@ -107,8 +106,8 @@ enum { GLSL_VERTEX, GLSL_FRAGMENT };
 //	neither is present
 //	-> use default for both
 //	-> create shader
-auto createShader(const std::string& arg1 = std::string(), const std::string& arg2 = std::string()) {
-	auto vertex = detail::glsl.default[0], fragment = detail::glsl.default[1];
+std::pair<std::string, std::string> createShader(const std::string& arg1 = std::string(), const std::string& arg2 = std::string()) {
+	auto vertex = detail::glsl.std[0], fragment = detail::glsl.std[1];
 	if (!arg1.empty()) {
 		if (detail::isVertexShader(arg1)) {
 			vertex = arg1;

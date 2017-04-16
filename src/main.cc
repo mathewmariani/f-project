@@ -5,11 +5,12 @@
 #include <unordered_map>
 
 // includes
+#include "libraries/mat4.h"
+#include "libraries/vec3.h"
+
 #include "matty/application.h"
 #include "matty/platform.h"
 #include "matty/shader.h"
-#include "matty/mat4.h"
-#include "matty/vec3.h"
 #include "matty/planebufferedgeometry.h"
 #include "matty/terraingeometry.h"
 #include "matty/camera.h"
@@ -42,28 +43,28 @@ void initialize() {
 		"regionRange = regionMax - regionMin;" \
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
-		"terrainColor += regionWeight * texture2D(uf_Ice, TexCoord * 16.0);" \
+		"terrainColor += regionWeight * texture(uf_Ice, TexCoord * 16.0);" \
 		"/* stone */" \
 		"regionMin = 0.35;" \
 		"regionMax = 0.8;" \
 		"regionRange = regionMax - regionMin;" \
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
-		"terrainColor += regionWeight * texture2D(uf_Stone, TexCoord * 16.0);" \
+		"terrainColor += regionWeight * texture(uf_Stone, TexCoord * 16.0);" \
 		"/* grass */" \
 		"regionMin = 0.0;" \
 		"regionMax = 0.36;" \
 		"regionRange = regionMax - regionMin;" \
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
-		"terrainColor += regionWeight * texture2D(uf_Grass, TexCoord * 16.0);" \
+		"terrainColor += regionWeight * texture(uf_Grass, TexCoord * 16.0);" \
 		"/* sand */" \
 		"regionMin = 0.0;" \
 		"regionMax = 0.15;" \
 		"regionRange = regionMax - regionMin;" \
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
-		"terrainColor += regionWeight * texture2D(uf_Sand, TexCoord * 16.0);" \
+		"terrainColor += regionWeight * texture(uf_Sand, TexCoord * 16.0);" \
 		"return terrainColor;" \
 		"}"
 		);
@@ -92,14 +93,16 @@ void initialize() {
 		"uv.y += 0.01 * (sin(uv.x * 3.5 + uTime * 0.35) + sin(uv.x * 4.8 + uTime * 1.05) + sin(uv.x * 7.3 + uTime * 0.45)) / 3.0;" \
 		"uv.x += 0.12 * (sin(uv.y * 4.0 + uTime * 0.5) + sin(uv.y * 6.8 + uTime * 0.75) + sin(uv.y * 11.3 + uTime * 0.2)) / 3.0;" \
 		"uv.y += 0.12 * (sin(uv.x * 4.2 + uTime * 0.64) + sin(uv.x * 6.3 + uTime * 1.65) + sin(uv.x * 8.2 + uTime * 0.45)) / 3.0;" \
-		"vec4 tex1 = texture2D(uf_Image, uv * 1.0);" \
-		"vec4 tex2 = texture2D(uf_Image, uv * 1.0 + vec2(0.2));" \
+		"vec4 tex1 = texture(uf_Image, uv * 1.0);" \
+		"vec4 tex2 = texture(uf_Image, uv * 1.0 + vec2(0.2));" \
 		"vec3 blue = vec3(0.20, 0.59, 0.85);" \
 		"return vec4(blue + vec3(tex1.a * 0.9 - tex2.a * 0.02), 1.0);" \
 		"}"
 		);
 
 	auto skybox = biscuit::createShader();
+    
+    std::cout << water.second << std::endl;
 
 	Shader::ShaderSource terrain_shader{ terrain.first, terrain.second };
 	Shader::ShaderSource water_shader{ water.first, water.second };
@@ -116,7 +119,7 @@ namespace game {
 	Config* gameConfig;
 
 	// Camera
-	Camera  camera(vec3<float>(0.0f, 15.0f, 3.0f));
+    Camera  camera({ 0.0f, 15.0f, 3.0f });
 	GLfloat lastX = 0.0f;
 	GLfloat lastY = 0.0f;
 	bool    keys[1024];

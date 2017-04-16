@@ -1,5 +1,8 @@
 #pragma once
 
+// C/C++
+#include <vector>
+
 #include "bufferedgeometry.h"
 
 class PlaneBufferedGeometry : public BufferedGeometry {

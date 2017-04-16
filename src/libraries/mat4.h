@@ -1,6 +1,8 @@
 #pragma once
 
 // C/C++
+#include <math.h> 
+
 #include "matn.h"
 #include "vecn.h"
 
@@ -17,8 +19,8 @@ public:
 		mat4 ret = mat4::identity();
 
 		const float rad = (angle * 0.0174533f);
-		const float c = std::cosf(rad);
-		const float s = std::sinf(rad);
+		const float c = cosf(rad);
+		const float s = sinf(rad);
 		const float ux = (rx * rx);
 		const float uy = (ry * ry);
 		const float uz = (rz * rz);
@@ -68,8 +70,8 @@ public:
 
 	static inline mat4 rotate(T angle, T x, T y, T z) {
 		const float rad = (angle * 0.0174533f);
-		const float c = std::cosf(rad);
-		const float s = std::sinf(rad);
+		const float c = cosf(rad);
+		const float s = sinf(rad);
 		const float ux = (x * x);
 		const float uy = (y * y);
 		const float uz = (z * z);
@@ -127,9 +129,9 @@ public:
 	}
 
 	static inline mat4 lookAt(const vecn<T, 3>& eye, const vecn<T, 3>& center, const vecn<T, 3>& up) {
-		const vec3<T> f = vec3<T>::normalize(center - eye);
-		const vec3<T> s = vec3<T>::cross(f, vec3<T>::normalize(up));
-		const vec3<T> u = vec3<T>::cross(s, f);
+		const vecn<T, 3> f = vecn<T, 3>::normalize(center - eye);
+		const vecn<T, 3> s = vecn<T, 3>::cross(f, vecn<T, 3>::normalize(up));
+		const vecn<T, 3> u = vecn<T, 3>::cross(s, f);
 
 		mat4 ret = mat4::identity();
 		ret[0][0] = s[0];
@@ -157,7 +159,7 @@ public:
 
 	static inline mat4 perspective(T fovy, T aspect, T n, T f) {
 		mat4 ret = mat4::identity();
-		float scale = (1.0f / std::tanf(fovy / 2.0f));
+		float scale = (1.0f / tanf(fovy / 2.0f));
 		float ratio = (scale / aspect);
 		ret[0][0] = (ratio);
 		ret[1][1] = (scale);

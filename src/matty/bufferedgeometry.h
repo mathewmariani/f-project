@@ -1,5 +1,5 @@
 #pragma once
-#include "matty/vec3.h"
+#include "libraries/vec3.h"
 #include "opengl/gl3w.h"
 
 typedef struct {
