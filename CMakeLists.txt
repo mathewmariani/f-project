@@ -57,6 +57,8 @@ set(PROJECT_SOURCE
 	src/matty/shader.h
 	src/matty/terraingeometry.cc
 	src/matty/terraingeometry.h
+	src/matty/texturemanager.cc
+	src/matty/texturemanager.h
 	src/matty/vec3.h
 	src/matty/vec2.h
 	src/matty/vecn.h
@@ -68,8 +70,9 @@ set(PROJECT_SOURCE
 	src/opengl/glcorearb.h
 
 	src/main.cc
-	src/textures.cc
-	src/textures.h
+	src/skybox.cc
+	src/skybox.h
+
 )
 
 # build executable

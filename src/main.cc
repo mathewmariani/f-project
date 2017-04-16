@@ -13,7 +13,7 @@
 #include "matty/planebufferedgeometry.h"
 #include "matty/terraingeometry.h"
 #include "matty/camera.h"
-#include "textures.h"
+#include "matty/texturemanager.h"
 #include "libraries/biscuit.h"
 
 
@@ -99,11 +99,15 @@ void initialize() {
 		"}"
 		);
 
+	auto skybox = biscuit::createShader();
+
 	Shader::ShaderSource terrain_shader{ terrain.first, terrain.second };
 	Shader::ShaderSource water_shader{ water.first, water.second };
+	Shader::ShaderSource skybox_shader{ skybox.first, skybox.second };
 
 	shader["terrain"] = std::make_shared<Shader>(terrain_shader);
 	shader["water"] = std::make_shared<Shader>(water_shader);
+	shader["skybox"] = std::make_shared<Shader>(skybox_shader);
 }
 }
 
@@ -153,7 +157,7 @@ namespace game {
 		GLfloat lastY = gameConfig->window.height / 2.0;
 	}
 
-Textures* textureManager = new Textures;
+TextureManager* textureManager = new TextureManager;
 
 PlaneBufferedGeometry water;
 TerrainGeometry plane;
@@ -172,14 +176,14 @@ void load() {
 
 	water = PlaneBufferedGeometry(100, 100, 100, 100);
 	plane = TerrainGeometry(100, 100, 100, 100);
-	
-	
+
+
 	ice_texture = textureManager->get("ice.png");
 	stone_texture = textureManager->get("stone.png");
 	rock_texture = textureManager->get("rock.png");
 	grass_texture = textureManager->get("grass.png");
 	sand_texture = textureManager->get("sand.png");
-	
+
 	water_texture = textureManager->get("water.png");
 }
 
@@ -204,55 +208,63 @@ void do_movement()
 	if (keys[GLFW_KEY_D])
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
-	
-	
+
+
 void draw() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	transform = camera.GetViewMatrix();
+
+	// skybox
+	auto skybox_shader = shaders::shader["skybox"];
+	skybox_shader->attach();
+	skybox_shader->setMatrix4("uf_Projection", projection);
+	skybox_shader->setMatrix4("uf_Transform", transform);
+	skybox_shader->setMatrix4("uf_Model", mat4f::identity());
+	skybox_shader->setInteger("uf_Image", 0);
+
+	// water
+	auto water_shader = shaders::shader["water"];
+	water_shader->attach();
+	water_shader->setMatrix4("uProjection", projection);
+	water_shader->setMatrix4("uView", transform);
+	water_shader->setMatrix4("uModel", mat4f::identity());
+	water_shader->setInteger("uf_Image", 0);
+	water_shader->setFloat("uf_Time", (float)glfwGetTime());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, water_texture->handle);
+
+	water.render();
+
+	// terrain
+	auto terrain_shader = shaders::shader["terrain"];
+	terrain_shader->attach();
+	terrain_shader->setMatrix4("uProjection", projection);
+	terrain_shader->setMatrix4("uView", transform);
+	terrain_shader->setMatrix4("uModel", mat4f::identity());
+	terrain_shader->setInteger("uf_Ice", 0);
+	terrain_shader->setInteger("uf_Stone", 1);
+	terrain_shader->setInteger("uf_Rock", 2);
+	terrain_shader->setInteger("uf_Grass", 3);
+	terrain_shader->setInteger("uf_Sand", 4);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, ice_texture->handle);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, stone_texture->handle);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, rock_texture->handle);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, grass_texture->handle);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, sand_texture->handle);
+
+	plane.render();
 }
-
-void draw2() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		transform = camera.GetViewMatrix();
-		auto water_shader = shaders::shader["water"];
-		water_shader->attach();
-		water_shader->setMatrix4("uProjection", projection);
-		water_shader->setMatrix4("uView", transform);
-		water_shader->setMatrix4("uModel", mat4f::identity());
-		water_shader->setInteger("uf_Image", 0);
-		water_shader->setFloat("uf_Time", (float)glfwGetTime());
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, water_texture->handle);
-
-		water.render();
-
-		auto terrain_shader = shaders::shader["terrain"];
-		terrain_shader->attach();
-		terrain_shader->setMatrix4("uProjection", projection);
-		terrain_shader->setMatrix4("uView", transform);
-		terrain_shader->setMatrix4("uModel", mat4f::identity());
-		terrain_shader->setInteger("uf_Ice", 0);
-		terrain_shader->setInteger("uf_Stone", 1);
-		terrain_shader->setInteger("uf_Rock", 2);
-		terrain_shader->setInteger("uf_Grass", 3);
-		terrain_shader->setInteger("uf_Sand", 4);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, ice_texture->handle);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, stone_texture->handle);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, rock_texture->handle);
-
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, grass_texture->handle);
-
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, sand_texture->handle);
-
-		plane.render();
-	}
 
 	void quit() {
 		printf("Quit\n");
@@ -275,7 +287,7 @@ void draw2() {
 		std::cout << "key: " << key << std::endl;
 		switch (key)
 		{
-			//the user can change the rendering mode i.e. points, lines, triangles based on keyboard input 
+			//the user can change the rendering mode i.e. points, lines, triangles based on keyboard input
 			case GLFW_KEY_P: {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 			}break;
@@ -287,15 +299,17 @@ void draw2() {
 			}break;
 		}
 	}
+
 	void keyReleased(int key, int scancode) {
 		printf("Key Released\n");
 		keys[key] = false;
 	}
+
 	bool firstMouse = true;
 	void cursor_callback( double xpos, double ypos)
 	{
 		if (mouseButtonLeftDown) {
-			
+
 			if (firstMouse)
 			{
 				lastX = xpos;
@@ -311,7 +325,7 @@ void draw2() {
 		lastX = xpos;
 		lastY = ypos;
 	}
-		
+
 }	// game
 
 
@@ -325,7 +339,7 @@ void draw2() {
 		app->init = &game::init;
 		app->load = &game::load;
 		app->update = &game::update;
-		app->draw = &game::draw2;//draw;
+		app->draw = &game::draw;
 		app->quit = &game::quit;
 		app->mousePressed = &game::mousePressed;
 		app->mouseReleased = &game::mouseReleased;

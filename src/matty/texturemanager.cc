@@ -1,9 +1,9 @@
 
 #include <iostream>
-#include "matty/textures.h"
+#include "matty/texturemanager.h"
 #include "libraries/soil/SOIL.h"
 
-void Textures::destroy(const std::string& name) {
+void TextureManager::destroy(const std::string& name) {
 	auto itr = cache.find(name);
 	if (itr != cache.end()) {
 		destroy(&itr->second);
@@ -11,20 +11,20 @@ void Textures::destroy(const std::string& name) {
 	}
 }
 
-void Textures::destroy(Texture* texture) {
+void TextureManager::destroy(Texture* texture) {
 	if (texture == nullptr) {
 		return;
 	}
 
-	glDeleteTextures (1, &texture->handle);
+	glDeleteTextures(1, &texture->handle);
 }
 
-Texture* Textures::get(const std::string& name) {
+Texture* TextureManager::get(const std::string& name) {
 	auto itr = cache.find(name);
 	return (itr != cache.end()) ? (&itr->second) : &(cache[name] = load(name));
 }
 
-Texture Textures::load(const std::string& name) {
+Texture TextureManager::load(const std::string& name) {
 	int w, h;
 	auto image = SOIL_load_image(name.c_str(), &w, &h, 0, SOIL_LOAD_AUTO);
 
@@ -33,7 +33,7 @@ Texture Textures::load(const std::string& name) {
 	}
 
 	GLuint textureId;
-	glGenTextures (1, &textureId);
+	glGenTextures(1, &textureId);
 
 	Texture texture;
 	texture.handle = textureId;
