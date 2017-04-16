@@ -1,5 +1,8 @@
 #pragma once
 
+// C/C++
+#include <vector>
+
 #include "bufferedgeometry.h"
 
 class PlaneBufferedGeometry : public BufferedGeometry {
@@ -14,6 +17,9 @@ private: // private variables
 	GLuint vao, vbo, ebo;
 
 	// buffers
+	std::vector<Vertex> vertices;
+	//std::vector<float> vertices;
+	//std::vector<float> uvs;
 	std::vector<int> indices;
-	std::vector<float> vertices;
+	
 };	// planebufferedgeometry

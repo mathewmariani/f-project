@@ -25,16 +25,24 @@ PlaneBufferedGeometry::PlaneBufferedGeometry(int w, int h, int ws, int hs) {
 		auto y = i * segment_height - height_half;
 		for (auto j = 0; j <= ws; ++j) {
 			auto x = j * segment_width - width_half;
-			vertices.push_back(x);
-			vertices.push_back(0);
-			vertices.push_back(-y);
+
+			vertices.push_back({
+				x, 0, -y,
+				((float)j / ws), (1.0f - ((float)i / hs))
+			});
 		}
 	}
 
 	// buffer data
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+	// bind VertexPosition aatribute
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, x));
+
+	// bind VertexTexCoord attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
 
 	// element buffer object
 	glGenBuffers(1, &ebo);
@@ -74,5 +82,5 @@ void PlaneBufferedGeometry::render() {
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glDrawElementsBaseVertex(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, 0);
-	//glBindVertexArray(0);
+	glBindVertexArray(0);
 }

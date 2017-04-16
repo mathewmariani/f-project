@@ -9,11 +9,11 @@
 Shader* Shader::current{ nullptr };
 
 std::string Shader::header{
-	"#version 330 core\n"
-	"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n"
+	"#version 330 core\n" \
+	"#define TransformProjectionMatrix (uf_Projection * uf_Transform * uf_Model)\n" \
 	"layout(location = 0) in vec3 VertexPosition;\n" \
-	"layout(location = 1) in vec3 VertexTexCoord;\n" \
-	"layout(location = 2) in vec3 VertexColor;\n"
+	"layout(location = 1) in vec2 VertexTexCoord;\n" \
+	"layout(location = 2) in vec4 VertexColor;\n" \
 	"uniform mat4 uf_Projection;\n" \
 	"uniform mat4 uf_Transform;\n" \
 	"uniform mat4 uf_Model;\n"\
@@ -41,6 +41,9 @@ void Shader::attach() {
 }
 
 void Shader::detach() {
+	if (current == this) {
+		current = nullptr;
+	}
 	glUseProgram(0);
 }
 
@@ -68,18 +71,18 @@ void Shader::compile(const ShaderSource& source) {
 	// vertex shader
 	auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	auto concat = (Shader::header + source.vertex);
-	const GLchar* vert = concat.c_str();
+	const GLchar* vert = source.vertex.c_str();
 	glShaderSource(vertexShader, 1, (const GLchar**)&vert, NULL);
 	glCompileShader(vertexShader);
 
-#if defined(DEBUG)
+//#if defined(DEBUG)
 	GLint successVert = 0;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &successVert);
 
 	if (successVert == GL_FALSE) {
 		printf("Vertex Shader failed to compile.\n");
 	}
-#endif
+#//endif
 
 	// fragment shader
 	auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -87,14 +90,20 @@ void Shader::compile(const ShaderSource& source) {
 	glShaderSource(fragmentShader, 1, (const GLchar**)&frag, NULL);
 	glCompileShader(fragmentShader);
 
-#if defined(DEBUG)
+//#if defined(DEBUG)
 	GLint successFrag = 0;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &successFrag);
-
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &successFrag);
+    
 	if (successFrag == GL_FALSE) {
 		printf("Fragment Shader failed to compile.\n");
+        int maxLength;
+        int length;
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+        char* log = new char[maxLength];
+        glGetShaderInfoLog(fragmentShader, maxLength,&length,log);
+        std::cout << log << std::endl;
 	}
-#endif
+//#endif
 
 	// attach shaders
 	program = glCreateProgram();
@@ -105,14 +114,20 @@ void Shader::compile(const ShaderSource& source) {
 	// linker
 	glLinkProgram(program);
 
-#if defined(DEBUG)
+//#if defined(DEBUG)
 	GLint successLink = 0;
 	glGetProgramiv(program, GL_LINK_STATUS, &successLink);
 
 	if (successLink == GL_FALSE) {
 		printf("Shaders failed to link.\n");
+        int maxLength;
+        int length;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+        char* log = new char[maxLength];
+        glGetProgramInfoLog(program, maxLength,&length,log);
+        std::cout << log << std::endl;
 	}
-#endif
+//#endif
 
 	//Clean up excess shader references
 	glDeleteShader(vertexShader);

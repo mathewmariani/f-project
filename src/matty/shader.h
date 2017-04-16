@@ -4,7 +4,7 @@
 #include <string>
 
 // matty
-#include "matty/mat4.h"
+#include "libraries/mat4.h"
 #include "matty/platform.h"
 
 // gl3w
@@ -30,7 +30,7 @@ public:
 	Shader(const GLchar * vertexPath, const GLchar * fragmentPath);
 	~Shader();
 
-	Shader::ShaderSource Shader::readFromFile(const GLchar * vertexPath, const GLchar * fragmentPath);
+	Shader::ShaderSource readFromFile(const GLchar * vertexPath, const GLchar * fragmentPath);
 	/**
 	* Use this function to attach this shader to the current rendering state.
 	*/

@@ -30,15 +30,35 @@ find_package(OPENGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 set(PROJECT_SOURCE
+	src/libraries/soil/image_DXT.c
+	src/libraries/soil/image_DXT.h
+	src/libraries/soil/image_helper.c
+	src/libraries/soil/image_helper.h
+	src/libraries/soil/soil.c
+	src/libraries/soil/soil.h
+	src/libraries/soil/stb_image_aug.c
+	src/libraries/soil/stb_image_aug.h
+	src/libraries/soil/stbi_DDS_aug_c.h
+	src/libraries/soil/stbi_DDS_aug.h
+
+	src/libraries/biscuit.h
+
+	src/libraries/mat4.h
+	src/libraries/matn.h
+	src/libraries/matn.inl
+
 	src/libraries/noise.h
+
 	src/libraries/perlinnoise.cpp
 	src/libraries/perlinnoise.h
 
+	src/libraries/vec3.h
+	src/libraries/vec2.h
+	src/libraries/vecn.h
+	src/libraries/vecn.inl
+
 	src/matty/application.h
 	src/matty/bufferedgeometry.h
-	src/matty/mat4.h
-	src/matty/matn.h
-	src/matty/matn.inl
 	src/matty/planebufferedgeometry.cc
 	src/matty/planebufferedgeometry.h
 	src/matty/platform.h
@@ -46,10 +66,8 @@ set(PROJECT_SOURCE
 	src/matty/shader.h
 	src/matty/terraingeometry.cc
 	src/matty/terraingeometry.h
-	src/matty/vec3.h
-	src/matty/vec2.h
-	src/matty/vecn.h
-	src/matty/vecn.inl
+	src/matty/texturemanager.cc
+	src/matty/texturemanager.h
 	src/matty/vertex.h
 	src/matty/camera.h
 	src/opengl/gl3w.c
@@ -57,6 +75,9 @@ set(PROJECT_SOURCE
 	src/opengl/glcorearb.h
 
 	src/main.cc
+	src/skybox.cc
+	src/skybox.h
+
 )
 
 # build executable

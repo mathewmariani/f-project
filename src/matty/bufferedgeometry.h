@@ -1,6 +1,12 @@
 #pragma once
-#include "matty/vec3.h"
+#include "libraries/vec3.h"
 #include "opengl/gl3w.h"
+
+typedef struct {
+	float x, y, z;
+	float u, v;
+	float r, g, b, a;
+} Vertex;
 
 class BufferedGeometry {
 public:
