@@ -35,7 +35,7 @@ PlaneBufferedGeometry::PlaneBufferedGeometry(int w, int h, int ws, int hs) {
 
 	// buffer data
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-	
+
 	// bind VertexPosition aatribute
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, x));

@@ -3,18 +3,18 @@
 // C/C++
 #include <vector>
 
-#include "opengl/gl3w.h"
 #include "libraries/soil/SOIL.h"
 #include "matty/bufferedgeometry.h"
 
 class Skybox : public BufferedGeometry {
 public:
-	Skybox();
-	GLuint createSkyboxVao();
-	GLuint createCubeMapTexture();
+	Skybox() = default;
+	~Skybox();
 
-private:
-	GLuint loadCubemap(std::vector<const GLchar*> faces);
+	void initialize();
+  void render();
+
+private:	// private variables
 	GLuint vao, vbo, ebo;
 
 	// buffers

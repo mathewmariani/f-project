@@ -3,6 +3,7 @@
 // C/C++
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 // gl3w
 #include "opengl/gl3w.h"
@@ -21,8 +22,11 @@ public:
 	void destroy(Texture* texture);
 
 	Texture* get(const std::string& name);
+  Texture getCubeMap(const std::vector<std::string>& names);
 
 private:
 	Texture load(const std::string& name);
+
+private:
 	std::unordered_map<std::string, Texture> cache;
 };

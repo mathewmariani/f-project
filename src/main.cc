@@ -16,6 +16,7 @@
 #include "matty/camera.h"
 #include "matty/texturemanager.h"
 #include "libraries/biscuit.h"
+#include "skybox.h"
 
 
 namespace shaders {
@@ -100,9 +101,12 @@ void initialize() {
 		"}"
 		);
 
-	auto skybox = biscuit::createShader();
-    
-    std::cout << water.second << std::endl;
+	auto skybox = biscuit::createShader(
+		"uniform samplerCube skybox;"
+		"vec4 effect(vec4 vcolor) {" \
+		"return texture(skybox, VertPosition.xyz);" \
+		"}"
+	);
 
 	Shader::ShaderSource terrain_shader{ terrain.first, terrain.second };
 	Shader::ShaderSource water_shader{ water.first, water.second };
@@ -119,7 +123,7 @@ namespace game {
 	Config* gameConfig;
 
 	// Camera
-    Camera  camera({ 0.0f, 15.0f, 3.0f });
+  Camera  camera({ 0.0f, 15.0f, 3.0f });
 	GLfloat lastX = 0.0f;
 	GLfloat lastY = 0.0f;
 	bool    keys[1024];
@@ -152,7 +156,6 @@ namespace game {
 		config->window.resizable = false;
 		config->window.vsyn = true;
 		gameConfig = config;
-		//initGameSettings();
 	}
 
 	void initGameSettings() {
@@ -164,6 +167,7 @@ TextureManager* textureManager = new TextureManager;
 
 PlaneBufferedGeometry water;
 TerrainGeometry plane;
+Skybox skybox;
 
 
 Texture* ice_texture;
@@ -172,6 +176,7 @@ Texture* rock_texture;
 Texture* grass_texture;
 Texture* sand_texture;
 Texture* water_texture;
+Texture skybox_cubemap;
 
 void load() {
 	printf("Load\n");
@@ -179,14 +184,19 @@ void load() {
 
 	water = PlaneBufferedGeometry(100, 100, 100, 100);
 	plane = TerrainGeometry(100, 100, 100, 100);
+    skybox.initialize();
 
+	skybox_cubemap = textureManager->getCubeMap({
+		"right.jpg", "left.jpg",
+		"top.jpg", "bottom.jpg",
+		"back.jpg", "front.jpg"
+	});
 
 	ice_texture = textureManager->get("ice.png");
 	stone_texture = textureManager->get("stone.png");
 	rock_texture = textureManager->get("rock.png");
 	grass_texture = textureManager->get("grass.png");
 	sand_texture = textureManager->get("sand.png");
-
 	water_texture = textureManager->get("water.png");
 }
 
@@ -218,12 +228,19 @@ void draw() {
 	transform = camera.GetViewMatrix();
 
 	// skybox
+	glDepthMask(GL_FALSE);
 	auto skybox_shader = shaders::shader["skybox"];
 	skybox_shader->attach();
-	skybox_shader->setMatrix4("uf_Projection", projection);
-	skybox_shader->setMatrix4("uf_Transform", transform);
-	skybox_shader->setMatrix4("uf_Model", mat4f::identity());
-	skybox_shader->setInteger("uf_Image", 0);
+	skybox_shader->setMatrix4("uProjection", projection);
+	skybox_shader->setMatrix4("uView", transform);
+	skybox_shader->setMatrix4("uModel", mat4f::identity());
+	skybox_shader->setInteger("skybox", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_cubemap.handle);
+
+    skybox.render();
+	glDepthMask(GL_TRUE);
 
 	// water
 	auto water_shader = shaders::shader["water"];
