@@ -60,31 +60,36 @@ Texture TextureManager::load(const std::string& name) {
 }
 
 Texture TextureManager::getCubeMap(const std::vector<std::string>& names) {
-    int w, h;
-    for(auto i = 0; i < names.size(); ++i) {
-        auto image = SOIL_load_image(names[i].c_str(), &w, &h, 0, SOIL_LOAD_AUTO);
-        
-        if (!image) {
-            std::cout << "Failed to load texture" << std::endl;
-        }
-        
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    }
-    
-    GLuint textureId;
-    glGenTextures(1, &textureId);
-    
-    Texture texture;
-    texture.handle = textureId;
-    texture.width = w;
-    texture.height = h;
-    
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    
-    return texture;
+	int w, h;
+	GLuint textureId;
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+
+	for (auto i = 0; i < names.size(); ++i) {
+		auto image = SOIL_load_image(names[i].c_str(), &w, &h, 0, SOIL_LOAD_AUTO);
+
+		if (!image) {
+			std::cout << "Failed to load texture" << std::endl;
+		}
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+		SOIL_free_image_data(image);
+	}
+
+
+
+	Texture texture;
+	texture.handle = textureId;
+	texture.width = w;
+	texture.height = h;
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return texture;
 }

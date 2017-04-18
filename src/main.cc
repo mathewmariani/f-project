@@ -46,7 +46,7 @@ void initialize() {
 		"regionWeight = max(0.0, regionWeight);" \
 		"terrainColor += regionWeight * texture(uf_Ice, TexCoord * 16.0);" \
 		"/* stone */" \
-		"regionMin = 0.35;" \
+		"regionMin = 0.30;" \
 		"regionMax = 0.8;" \
 		"regionRange = regionMax - regionMin;" \
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
@@ -54,7 +54,7 @@ void initialize() {
 		"terrainColor += regionWeight * texture(uf_Stone, TexCoord * 16.0);" \
 		"/* grass */" \
 		"regionMin = 0.0;" \
-		"regionMax = 0.36;" \
+		"regionMax = 0.32;" \
 		"regionRange = regionMax - regionMin;" \
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
@@ -101,7 +101,14 @@ void initialize() {
 		"}"
 		);
 
+	// the vertex shader uses a hack to removed translations
 	auto skybox = biscuit::createShader(
+		"vec4 position(mat4 transform_proj, vec4 vertpos) {" \
+		"mat3 view3 = mat3(uView);" \
+		"mat4 view4 = mat4(view3);" \
+		"return uProjection * view4 * vertpos;" \
+		"}",
+
 		"uniform samplerCube skybox;"
 		"vec4 effect(vec4 vcolor) {" \
 		"return texture(skybox, VertPosition.xyz);" \
