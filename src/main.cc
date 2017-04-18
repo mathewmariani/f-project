@@ -30,16 +30,13 @@ void initialize() {
 		"uniform sampler2D uf_Stone;" \
 		"uniform sampler2D uf_Rock;" \
 		"uniform sampler2D uf_Grass;" \
-		"uniform sampler2D uf_Sand;" \
-		
-		"uniform vec3 viewPos; \n"\
-		"uniform vec3 lightPos; \n"\
-		"uniform vec3 lightColor; \n"\
-		
+		"uniform sampler2D uf_Sand;"
+		"uniform float lightAmbientStrength;" \
+		"uniform bool lightSwitch;"
 		"vec3 lightEffect(vec3 VertColor) {" \
 		"vec3 distance = lightPos - VertPosition;" \
 		// Ambient with distance atenuation
-		"float ambientStrength = 0.5f;" \
+		"float ambientStrength = lightAmbientStrength;" \
 		"vec3 ambient = ambientStrength * lightColor / (distance*distance);" \
 		// Diffuse 
 		"vec3 norm = normalize(Normal);" \
@@ -56,7 +53,7 @@ void initialize() {
 		"vec3 result = (ambient + diffuse + specular) * VertColor;" \
 		"return result;" \
 		"}"\
-		
+
 		"vec4 effect(vec4 vcolor) {" \
 		"vec4 terrainColor = vec4(0.0, 0.0, 0.0, 1.0);" \
 		"float height = vcolor.a;" \
@@ -92,10 +89,14 @@ void initialize() {
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
 		"terrainColor += regionWeight * texture(uf_Sand, TexCoord * 16.0);" \
-		"return terrainColor;" \
+		"if(lightSwitch){"\
+		"return terrainColor +vec4(lightEffect(vec3(terrainColor.x, terrainColor.y, terrainColor.z)),terrainColor.z);" \
+		"}else{"\
+		"return terrainColor;"\
+		"}"\
 		"}"\
 		);
-		//"return terrainColor +vec4(lightEffect(vec3(terrainColor.x, terrainColor.y, terrainColor.z)),terrainColor.z);" \
+		
 
 	auto water = biscuit::createShader(
 		"uniform float uf_Time;" \
@@ -159,9 +160,9 @@ namespace game {
 	// Camera
 	Camera  camera({ 0.0f, 15.0f, 3.0f });
 	struct Light {
-		  vec3f lightPos = vec3<float>(50.0f, 50.0f, 50.0f);
+		  vec3f lightPos = vec3<float>(90.0f, 90.0, 90.0f);
 		  vec3f lightColor = vec3<float>(1.0f, 1.0f, 1.0f);
-		  GLfloat ambientStrength = 0.6;
+		  GLfloat ambientStrength = 0.4;
 		  GLfloat specularStrength = 0.5f;
 	};
 	Light light;
@@ -170,7 +171,7 @@ namespace game {
 	bool    keys[1024];
 	int lastkey = 0;
 	// Light attributes
-	vec3<float> lightPos(50.0f, 50.0f, 50.0f);
+	//vec3<float> lightPos(50.0f, 50.0f, 50.0f);
 
 	// Deltatime
 	GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -180,6 +181,7 @@ namespace game {
 	bool mouseButtonLeftDown = false;
 	double mousePosY = 0;
 	double mousePosY_down = 0;
+	bool lightSwitch = false;
 
 	mat4f projection = mat4f::perspective(45.0f, ((float)600 / (float)533), 0.1f, 100.0f);
 	mat4f transform = camera.GetViewMatrix();
@@ -264,8 +266,9 @@ void do_movement()
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 void updateLightPos() {
-	GLfloat lightPos_steps = 10.0;
-	switch (lastkey) {
+	GLfloat lightPos_steps = 1.0;
+	if (keys[lastkey]) {
+		switch (lastkey) {
 		case GLFW_KEY_I: {
 			light.lightPos[1] = light.lightPos[1] + lightPos_steps;
 		}break;
@@ -276,8 +279,30 @@ void updateLightPos() {
 			light.lightPos[0] = light.lightPos[0] + lightPos_steps;
 		}break;
 		case GLFW_KEY_L: {
-			light.lightPos[0] = light.lightPos[0] + lightPos_steps;
+			light.lightPos[0] = light.lightPos[0] - lightPos_steps;
+
 		}break;
+		case GLFW_KEY_Y: {
+			light.lightPos[2] = light.lightPos[2] + lightPos_steps;
+		}break;
+		case GLFW_KEY_H: {
+			light.lightPos[2] = light.lightPos[2] - lightPos_steps;
+
+		}break; 
+
+			if (light.lightPos[0] > -51) {
+				light.lightPos[0] = 51;
+			}
+			else if (light.lightPos[0] < 51)
+				light.lightPos[0] = -51;
+
+			if (light.lightPos[1] > -51) {
+				light.lightPos[1] = 51;
+			}
+			else if (light.lightPos[1] < 51)
+				light.lightPos[1] = -51;			
+		}
+		std::cout << "light pos: (" << light.lightPos[0] << ", " << light.lightPos[1] << ", " << light.lightPos[2] << ")" << std::endl;
 	}
 }
 
@@ -329,7 +354,9 @@ void draw() {
 	terrain_shader->setInteger("uf_Grass", 3);
 	terrain_shader->setInteger("uf_Sand", 4);
 	terrain_shader->setFloat("lightAmbientStrength", light.ambientStrength);
-	terrain_shader->setFloat("lightAmbientStrength", light.ambientStrength);
+	terrain_shader->setFloat("lightSwitch", lightSwitch);
+
+	//terrain_shader->setFloat("lightAmbientStrength", light.ambientStrength);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, ice_texture->handle);
@@ -382,8 +409,18 @@ void draw() {
 			case GLFW_KEY_T: {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}break;
-			
+			case GLFW_KEY_UP: {
+				light.ambientStrength = abs(light.ambientStrength + 0.1f);
+			}break;
+			case GLFW_KEY_DOWN: {
+				light.ambientStrength = abs(light.ambientStrength - 0.1f);
+			}break;
+			case GLFW_KEY_Z: {
+				lightSwitch = !lightSwitch;
+
+			}break;
 		}
+		std::cout << "ambiant strength " << light.ambientStrength << std::endl;
 	}
 
 	void keyReleased(int key, int scancode) {
