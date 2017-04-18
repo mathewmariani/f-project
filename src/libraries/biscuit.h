@@ -28,18 +28,25 @@ struct GLSL {
 		"layout(location = 0) in vec3 VertexPosition;" \
 		"layout(location = 1) in vec2 VertexTexCoord;" \
 		"layout(location = 2) in vec4 VertexColor;" \
+		"layout(location = 3) in vec3 VertexNormal;" \
 		"uniform mat4 uProjection;" \
 		"uniform mat4 uView;" \
 		"uniform mat4 uModel;"\
 		"out vec3 VertPosition;" \
 		"out vec2 TexCoord;" \
-		"out vec4 VertColor;",
+		"out vec4 VertColor;"
+		"out vec3 Normal;",
 
-    // fragment
+		// fragment
 		"in vec3 VertPosition;" \
 		"in vec2 TexCoord;" \
 		"in vec4 VertColor;" \
-		"out vec4 FragColor;"
+		"in vec3 Normal;"\
+		"out vec4 FragColor;"\
+		
+		"uniform vec3 viewPos; \n"\
+		"uniform vec3 lightPos; \n"\
+		"uniform vec3 lightColor; \n"\
 		}};
 	std::array<std::string, 2> std{{
 		// vertex
@@ -60,6 +67,7 @@ struct GLSL {
 		"VertColor = VertexColor;" \
 		"vec4 vertpos = vec4(VertexPosition.xyz, 1.0);" \
 		"gl_Position = position((uProjection * uView * uModel), vertpos);" \
+		"Normal = mat3(transpose(inverse(uModel))) * VertexNormal;"
 		"}",
 
 		// fragment

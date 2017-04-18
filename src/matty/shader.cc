@@ -14,6 +14,7 @@ std::string Shader::header{
 	"layout(location = 0) in vec3 VertexPosition;\n" \
 	"layout(location = 1) in vec2 VertexTexCoord;\n" \
 	"layout(location = 2) in vec4 VertexColor;\n" \
+	"layout(location = 3) in vec3 VertexNormal;\n"
 	"uniform mat4 uf_Projection;\n" \
 	"uniform mat4 uf_Transform;\n" \
 	"uniform mat4 uf_Model;\n"\

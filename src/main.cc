@@ -67,6 +67,27 @@ void initialize() {
 		"regionWeight = max(0.0, regionWeight);" \
 		"terrainColor += regionWeight * texture(uf_Sand, TexCoord * 16.0);" \
 		"return terrainColor;" \
+		"}"\
+		
+		"vec3 lightEffect(vec3 VertColor) {" \
+		"vec3 distance = lightPos - VertPosition;" \
+		// Ambient with distance atenuation
+		"float ambientStrength = 0.14f;" \
+		"vec3 ambient = ambientStrength * lightColor / (distance*distance);" \
+		// Diffuse 
+		"vec3 norm = normalize(Normal);" \
+		"vec3 lightDir = normalize(lightPos - VertPosition);" \
+		"float diff = max(dot(norm, lightDir), 0.0);" \
+		"vec3 diffuse = diff * lightColor;" \
+		// Specular
+		"float specularStrength = 0.5f;" \
+		"vec3 viewDir = normalize(viewPos - VertPosition);" \
+		"vec3 reflectDir = reflect(-lightDir, norm);" \
+		"float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);" \
+		"vec3 specular = specularStrength * spec * lightColor;" \
+
+		"vec3 result = (ambient + diffuse + specular) * VertColor;" \
+		"return result;" \
 		"}"
 		);
 
@@ -136,7 +157,7 @@ namespace game {
 	bool    keys[1024];
 
 	// Light attributes
-	vec3<float> lightPos(1.2f, 1.0f, 2.0f);
+	vec3<float> lightPos(50.0f, 50.0f, 50.0f);
 
 	// Deltatime
 	GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -266,6 +287,9 @@ void draw() {
 	// terrain
 	auto terrain_shader = shaders::shader["terrain"];
 	terrain_shader->attach();
+	terrain_shader->setVector3f("lightPos", lightPos[0], lightPos[1], lightPos[2]);
+	terrain_shader->setVector3f("lightColor", 1.0f, 1.0f, 1.0f);
+	terrain_shader->setVector3f("viewPos", camera.Position[0], camera.Position[1], camera.Position[2]);
 	terrain_shader->setMatrix4("uProjection", projection);
 	terrain_shader->setMatrix4("uView", transform);
 	terrain_shader->setMatrix4("uModel", mat4f::identity());

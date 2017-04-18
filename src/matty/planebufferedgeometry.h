@@ -14,12 +14,12 @@ public:
 	void render();
 
 private: // private variables
-	GLuint vao, vbo, ebo;
+	GLuint vao, vbo, ebo, normalbuffer;
 
 	// buffers
 	std::vector<Vertex> vertices;
 	//std::vector<float> vertices;
 	//std::vector<float> uvs;
-	std::vector<int> indices;
-	
+	std::vector<GLuint> indices;
+	std::vector<Vertex>  normals;
 };	// planebufferedgeometry

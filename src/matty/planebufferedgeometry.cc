@@ -28,7 +28,9 @@ PlaneBufferedGeometry::PlaneBufferedGeometry(int w, int h, int ws, int hs) {
 
 			vertices.push_back({
 				x, 0, -y,
-				((float)j / ws), (1.0f - ((float)i / hs))
+				((float)j / ws), (1.0f - ((float)i / hs)),
+				0.0f, 0.0f, 0.0f, 0.0f,
+				vec3f(0,0,0)
 			});
 		}
 	}
@@ -70,7 +72,20 @@ PlaneBufferedGeometry::PlaneBufferedGeometry(int w, int h, int ws, int hs) {
 	// element buffer object
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
-	// unbind vao
+	//Normal buffer object 
+	glGenBuffers(1, &normalbuffer);
+
+	// generate normals
+	normals = computeNormalVector(indices.data(), indices.size(), vertices.data(), vertices.size());
+	//
+	//// Binding normal attribute
+	//glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+	//glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vertex), &normals[0], GL_STATIC_DRAW);
+
+	//
+	//glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	//glEnableVertexAttribArray(3);
+	//// unbind vao
 	glBindVertexArray(0);
 }
 
