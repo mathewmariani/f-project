@@ -31,6 +31,27 @@ void initialize() {
 		"uniform sampler2D uf_Rock;" \
 		"uniform sampler2D uf_Grass;" \
 		"uniform sampler2D uf_Sand;" \
+		"vec3 lightEffect(vec3 VertColor) {" \
+		"vec3 distance = lightPos - VertPosition;" \
+		// Ambient with distance atenuation
+		"float ambientStrength = 0.14f;" \
+		"vec3 ambient = ambientStrength * lightColor / (distance*distance);" \
+		// Diffuse 
+		"vec3 norm = normalize(Normal);" \
+		"vec3 lightDir = normalize(lightPos - VertPosition);" \
+		"float diff = max(dot(norm, lightDir), 0.0);" \
+		"vec3 diffuse = diff * lightColor;" \
+		// Specular
+		"float specularStrength = 0.5f;" \
+		"vec3 viewDir = normalize(viewPos - VertPosition);" \
+		"vec3 reflectDir = reflect(-lightDir, norm);" \
+		"float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);" \
+		"vec3 specular = specularStrength * spec * lightColor;" \
+
+		"vec3 result = (ambient + diffuse + specular) * VertColor;" \
+		"return result;" \
+		"}"\
+		
 		"vec4 effect(vec4 vcolor) {" \
 		"vec4 terrainColor = vec4(0.0, 0.0, 0.0, 1.0);" \
 		"float height = vcolor.a;" \
@@ -66,29 +87,9 @@ void initialize() {
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
 		"terrainColor += regionWeight * texture(uf_Sand, TexCoord * 16.0);" \
-		"return terrainColor;" \
+		/*"return terrainColor;" \*/
+		"return terrainColor +vec4(lightEffect(vec3(terrainColor.x, terrainColor.y, terrainColor.z)),terrainColor.z);" \
 		"}"\
-		
-		"vec3 lightEffect(vec3 VertColor) {" \
-		"vec3 distance = lightPos - VertPosition;" \
-		// Ambient with distance atenuation
-		"float ambientStrength = 0.14f;" \
-		"vec3 ambient = ambientStrength * lightColor / (distance*distance);" \
-		// Diffuse 
-		"vec3 norm = normalize(Normal);" \
-		"vec3 lightDir = normalize(lightPos - VertPosition);" \
-		"float diff = max(dot(norm, lightDir), 0.0);" \
-		"vec3 diffuse = diff * lightColor;" \
-		// Specular
-		"float specularStrength = 0.5f;" \
-		"vec3 viewDir = normalize(viewPos - VertPosition);" \
-		"vec3 reflectDir = reflect(-lightDir, norm);" \
-		"float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);" \
-		"vec3 specular = specularStrength * spec * lightColor;" \
-
-		"vec3 result = (ambient + diffuse + specular) * VertColor;" \
-		"return result;" \
-		"}"
 		);
 
 	auto water = biscuit::createShader(
