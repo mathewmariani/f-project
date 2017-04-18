@@ -31,10 +31,15 @@ void initialize() {
 		"uniform sampler2D uf_Rock;" \
 		"uniform sampler2D uf_Grass;" \
 		"uniform sampler2D uf_Sand;" \
+		
+		"uniform vec3 viewPos; \n"\
+		"uniform vec3 lightPos; \n"\
+		"uniform vec3 lightColor; \n"\
+		
 		"vec3 lightEffect(vec3 VertColor) {" \
 		"vec3 distance = lightPos - VertPosition;" \
 		// Ambient with distance atenuation
-		"float ambientStrength = 0.14f;" \
+		"float ambientStrength = 0.5f;" \
 		"vec3 ambient = ambientStrength * lightColor / (distance*distance);" \
 		// Diffuse 
 		"vec3 norm = normalize(Normal);" \
@@ -87,10 +92,10 @@ void initialize() {
 		"regionWeight = (regionRange - abs(height - regionMax)) / regionRange;" \
 		"regionWeight = max(0.0, regionWeight);" \
 		"terrainColor += regionWeight * texture(uf_Sand, TexCoord * 16.0);" \
-		/*"return terrainColor;" \*/
-		"return terrainColor +vec4(lightEffect(vec3(terrainColor.x, terrainColor.y, terrainColor.z)),terrainColor.z);" \
+		"return terrainColor;" \
 		"}"\
 		);
+		//"return terrainColor +vec4(lightEffect(vec3(terrainColor.x, terrainColor.y, terrainColor.z)),terrainColor.z);" \
 
 	auto water = biscuit::createShader(
 		"uniform float uf_Time;" \
@@ -152,11 +157,18 @@ namespace game {
 	Config* gameConfig;
 
 	// Camera
-  Camera  camera({ 0.0f, 15.0f, 3.0f });
+	Camera  camera({ 0.0f, 15.0f, 3.0f });
+	struct Light {
+		  vec3f lightPos = vec3<float>(50.0f, 50.0f, 50.0f);
+		  vec3f lightColor = vec3<float>(1.0f, 1.0f, 1.0f);
+		  GLfloat ambientStrength = 0.6;
+		  GLfloat specularStrength = 0.5f;
+	};
+	Light light;
 	GLfloat lastX = 0.0f;
 	GLfloat lastY = 0.0f;
 	bool    keys[1024];
-
+	int lastkey = 0;
 	// Light attributes
 	vec3<float> lightPos(50.0f, 50.0f, 50.0f);
 
@@ -175,6 +187,7 @@ namespace game {
 	//prototype
 	void initGameSettings();
 	void do_movement();
+	void updateLightPos();
 
 	void init(Config* config) {
 		config->window.width = 600;
@@ -234,7 +247,7 @@ void update() {
 	GLfloat currentFrame = glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
-
+	updateLightPos();
 	do_movement();
 }
 
@@ -250,7 +263,23 @@ void do_movement()
 	if (keys[GLFW_KEY_D])
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
-
+void updateLightPos() {
+	GLfloat lightPos_steps = 10.0;
+	switch (lastkey) {
+		case GLFW_KEY_I: {
+			light.lightPos[1] = light.lightPos[1] + lightPos_steps;
+		}break;
+		case GLFW_KEY_K: {
+			light.lightPos[1] = light.lightPos[1] - lightPos_steps;
+		}break;
+		case GLFW_KEY_J: {
+			light.lightPos[0] = light.lightPos[0] + lightPos_steps;
+		}break;
+		case GLFW_KEY_L: {
+			light.lightPos[0] = light.lightPos[0] + lightPos_steps;
+		}break;
+	}
+}
 
 void draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -288,8 +317,8 @@ void draw() {
 	// terrain
 	auto terrain_shader = shaders::shader["terrain"];
 	terrain_shader->attach();
-	terrain_shader->setVector3f("lightPos", lightPos[0], lightPos[1], lightPos[2]);
-	terrain_shader->setVector3f("lightColor", 1.0f, 1.0f, 1.0f);
+	terrain_shader->setVector3f("lightPos", light.lightPos[0], light.lightPos[1], light.lightPos[2]);
+	terrain_shader->setVector3f("lightColor", light.lightColor[0], light.lightColor[0], light.lightColor[0]);
 	terrain_shader->setVector3f("viewPos", camera.Position[0], camera.Position[1], camera.Position[2]);
 	terrain_shader->setMatrix4("uProjection", projection);
 	terrain_shader->setMatrix4("uView", transform);
@@ -299,6 +328,8 @@ void draw() {
 	terrain_shader->setInteger("uf_Rock", 2);
 	terrain_shader->setInteger("uf_Grass", 3);
 	terrain_shader->setInteger("uf_Sand", 4);
+	terrain_shader->setFloat("lightAmbientStrength", light.ambientStrength);
+	terrain_shader->setFloat("lightAmbientStrength", light.ambientStrength);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, ice_texture->handle);
@@ -334,8 +365,10 @@ void draw() {
 	}
 
 	void keyPressed(int key, int scancode) {
+		
 		printf("Key Pressed\n");
 		keys[key] = true;
+		lastkey = key;
 		std::cout << "key: " << key << std::endl;
 		switch (key)
 		{
@@ -349,6 +382,7 @@ void draw() {
 			case GLFW_KEY_T: {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}break;
+			
 		}
 	}
 

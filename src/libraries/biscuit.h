@@ -43,10 +43,6 @@ struct GLSL {
 		"in vec4 VertColor;" \
 		"in vec3 Normal;"\
 		"out vec4 FragColor;"\
-		
-		"uniform vec3 viewPos; \n"\
-		"uniform vec3 lightPos; \n"\
-		"uniform vec3 lightColor; \n"\
 		}};
 	std::array<std::string, 2> std{{
 		// vertex
